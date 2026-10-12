@@ -52,18 +52,18 @@ When the backend is ready, mock calls are swapped for Server Actions without cha
 **Outcome:** sell in 3 taps (tile → qty → pay), on both mobile and tablet.
 
 ## 4. Stock
-- [ ] `ProductTable`: list, search, filter by category, stock qty
-- [ ] `ProductForm`: create / edit, unit, prices, low-stock level
-- [ ] `VariantForm`: add size / color rows
-- [ ] `StockInForm`: product → qty → cost (pre-filled), supplier
-- [ ] `StockAlerts`: low stock + reorder suggestion, dead stock (60+ days)
-- [ ] Hide cost price for staff
+- [x] `ProductTable`: list, search, filter by category, stock qty
+- [x] `ProductForm`: create / edit, unit, prices, low-stock level
+- [x] `VariantForm`: add size / color rows
+- [x] `StockInForm`: product → qty → cost (pre-filled), supplier
+- [x] `StockAlerts`: low stock + reorder suggestion, dead stock (60+ days)
+- [x] Hide cost price for staff (staff stock in uses last cost)
 
 **Outcome:** products can be browsed, added, edited and restocked, with alerts visible.
 
 ## 5. Expense (staff + owner)
-- [ ] `ExpenseForm`: category icons → amount numpad → save
-- [ ] Today's expense list
+- [x] `ExpenseForm`: category icons → amount numpad → save
+- [x] Today's expense list
 
 **Outcome:** an expense is recorded in 2 taps.
 

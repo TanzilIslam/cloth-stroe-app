@@ -1,8 +1,12 @@
 // In-memory mock tables. Resets on page reload. Replaced by Neon later.
 import type {
+  CashCount,
   Customer,
+  Expense,
+  Payment,
   Product,
   ProductVariant,
+  Purchase,
   Sale,
   SaleItem,
   Shop,
@@ -270,3 +274,101 @@ export const suppliers: Supplier[] = [
 
 export const sales: Sale[] = []
 export const saleItems: SaleItem[] = []
+export const purchases: Purchase[] = []
+export const expenses: Expense[] = []
+export const payments: Payment[] = []
+export const cashCounts: CashCount[] = []
+
+// --- Generated history (last 70 days) for reports. Deterministic. ---
+
+let seed = 42
+const rand = () => {
+  seed = (seed * 16807) % 2147483647
+  return (seed - 1) / 2147483646
+}
+const pick = <T>(arr: T[]) => arr[Math.floor(rand() * arr.length)]
+
+/** Not sold in the last 60 days, so they show up as dead stock. */
+const DEAD_IDS = [4, 12]
+const QTY = { yard: [1, 1.5, 2, 2.5, 3], meter: [1, 2], piece: [1, 1, 2] }
+
+function daysAgo(days: number, hour: number) {
+  const d = new Date()
+  d.setDate(d.getDate() - days)
+  d.setHours(hour, Math.floor(rand() * 60), 0, 0)
+  return d
+}
+
+for (let day = 70; day >= 1; day--) {
+  for (const shop of shops) {
+    const pool = products.filter(
+      (p) => p.shopId === shop.id && (day > 60 || !DEAD_IDS.includes(p.id))
+    )
+    const count = 3 + Math.floor(rand() * 6)
+    for (let n = 0; n < count; n++) {
+      const id = sales.length + 1
+      const items = Array.from({ length: rand() < 0.3 ? 2 : 1 }, () => {
+        const p = pick(pool)
+        const v = variants.filter((x) => x.productId === p.id)
+        return {
+          saleId: id,
+          productId: p.id,
+          variantId: v.length ? pick(v).id : null,
+          qty: pick(QTY[p.unit]),
+          price: p.sellPrice,
+          costSnapshot: p.costPrice,
+        }
+      })
+      const total = items.reduce((s, i) => s + i.qty * i.price, 0)
+      const roll = rand()
+      const method = roll < 0.65 ? "cash" : roll < 0.9 ? "bKash" : "due"
+      const due = method === "due" ? total : 0
+      saleItems.push(...items)
+      sales.push({
+        id,
+        shopId: shop.id,
+        userId: shop.id === 1 ? 2 : 3,
+        customerId: due ? (shop.id === 1 ? 2 : 4) : null,
+        total,
+        discount: 0,
+        paid: total - due,
+        due,
+        method,
+        createdAt: daysAgo(day, 10 + Math.floor(rand() * 11)),
+      })
+    }
+  }
+}
+
+for (const shop of shops) {
+  for (const day of [65, 35, 5]) {
+    expenses.push(
+      {
+        id: expenses.length + 1,
+        shopId: shop.id,
+        category: "rent",
+        amount: 15000,
+        note: null,
+        date: daysAgo(day, 11),
+      },
+      {
+        id: expenses.length + 2,
+        shopId: shop.id,
+        category: "salary",
+        amount: 12000,
+        note: null,
+        date: daysAgo(day, 12),
+      }
+    )
+  }
+  for (let day = 60; day >= 1; day -= 7) {
+    expenses.push({
+      id: expenses.length + 1,
+      shopId: shop.id,
+      category: pick(["bill", "tailor", "other"] as const),
+      amount: 300 + Math.floor(rand() * 15) * 100,
+      note: null,
+      date: daysAgo(day, 15),
+    })
+  }
+}

@@ -4,11 +4,16 @@
 import { LogOut } from "lucide-react"
 import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
+import { toast } from "sonner"
 
 import { BottomNav } from "@/components/layout/bottom-nav"
 import { OWNER_ONLY } from "@/components/layout/nav-items"
 import { Sidebar } from "@/components/layout/sidebar"
-import { ExpenseForm } from "@/components/hisab/expense-form"
+import {
+  ExpenseForm,
+  type ExpenseValues,
+} from "@/components/hisab/expense-form"
+import { ExpenseList } from "@/components/hisab/expense-list"
 import { Button } from "@/components/ui/button"
 import {
   Sheet,
@@ -16,8 +21,15 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet"
+import { useQuery } from "@/hooks/use-query"
 import { useSession } from "@/hooks/use-session"
-import { logout, switchShop } from "@/mocks"
+import {
+  createExpense,
+  deleteExpense,
+  getTodayExpenses,
+  logout,
+  switchShop,
+} from "@/mocks"
 import { shops } from "@/mocks/data" // static config: 2 shops
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -25,6 +37,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
   const [expenseOpen, setExpenseOpen] = useState(false)
+  const shopId = user?.shopId
+  const todayExpenses = useQuery(
+    () =>
+      shopId && expenseOpen ? getTodayExpenses(shopId) : Promise.resolve([]),
+    [shopId, expenseOpen]
+  )
 
   const blocked =
     user?.role === "staff" && OWNER_ONLY.some((p) => pathname.startsWith(p))
@@ -42,6 +60,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const shop = shops[shopIndex]
   const nextShop = shops[(shopIndex + 1) % shops.length]
   const handleLogout = () => logout()
+
+  async function saveExpense(values: ExpenseValues) {
+    await createExpense({ shopId: user!.shopId, ...values })
+    toast.success("Expense saved")
+    todayExpenses.reload()
+  }
 
   return (
     <div className="flex min-h-svh">
@@ -83,11 +107,28 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <BottomNav role={user.role} onExpense={() => setExpenseOpen(true)} />
 
       <Sheet open={expenseOpen} onOpenChange={setExpenseOpen}>
-        <SheetContent side="bottom">
+        <SheetContent side="bottom" className="max-h-[90svh] overflow-y-auto">
           <SheetHeader>
             <SheetTitle>Add Expense</SheetTitle>
           </SheetHeader>
-          <ExpenseForm />
+          <div className="mx-auto flex w-full max-w-md flex-col gap-4 px-4 pb-6">
+            <ExpenseForm onSubmit={saveExpense} />
+            <div>
+              <h3 className="mb-2 text-sm font-medium">Today</h3>
+              <ExpenseList
+                expenses={todayExpenses.data ?? []}
+                empty="No expenses today"
+                onDelete={
+                  user.role === "owner"
+                    ? async (id) => {
+                        await deleteExpense(id)
+                        todayExpenses.reload()
+                      }
+                    : undefined
+                }
+              />
+            </div>
+          </div>
         </SheetContent>
       </Sheet>
     </div>

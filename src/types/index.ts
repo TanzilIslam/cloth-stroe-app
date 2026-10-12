@@ -174,3 +174,39 @@ export interface PartyInput {
   name: string
   phone: string
 }
+
+export type ProductInput = Omit<Product, "id" | "active">
+
+export interface VariantInput {
+  id?: ID // omit = create
+  productId: ID
+  size: string | null
+  color: string | null
+}
+
+export interface PurchaseInput {
+  shopId: ID
+  supplierId: ID
+  productId: ID
+  variantId: ID | null
+  qty: number
+  cost: Money | null // per unit; null = use last cost (staff)
+  paid: Money
+}
+
+export type ExpenseInput = Omit<Expense, "id" | "date">
+
+// Report rows
+
+export interface LowStockRow {
+  product: Product
+  variant: ProductVariant | null
+  stock: number
+  reorderQty: number
+}
+
+export interface DeadStockRow {
+  product: Product
+  stock: number
+  lastSoldAt: Date | null
+}
