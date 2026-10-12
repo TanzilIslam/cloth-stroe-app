@@ -43,7 +43,7 @@ Staff do only **3 actions**: বিক্রি (sell), মাল তোলা (
 - **Sell in 3 taps:** favorite/recent product tiles → qty chips (1 / 2 / 2.5 / 3 yard) → pay button.
 - **Stock in:** pick product → qty → cost (pre-filled from last time).
 - **Expense:** category icon → amount.
-- **Language:** Bangla everywhere, big buttons, numpad entry.
+- **Language:** English for now (Bangla later), big buttons, numpad entry.
 - **Hidden from staff:** cost price and profit.
 
 ## Layouts

@@ -29,7 +29,7 @@ src/
 |---|---|---|
 | Actions | `auth`, `sales`, `products`, `purchases`, `parties`, `expenses`, `cash`, `reports` | Read and write data for each domain |
 | DB | `schema`, `index`, `seed` | Tables, connection, sample data |
-| Lib | `session`, `utils`, `calc` | PIN session, formatting (Taka, Bangla digits), profit and reorder math |
+| Lib | `session`, `utils`, `calc` | PIN session, formatting (Taka, dates, WhatsApp link), profit and reorder math |
 | Types | `index`, `validations` | Interfaces and Zod schemas |
 | Hooks | `use-cart`, `use-session`, `use-query` | POS cart, current user, page data loading |
 | Config | `middleware`, `drizzle.config` | Route protection, migrations |
