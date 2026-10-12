@@ -50,7 +50,6 @@ Staff do only **3 actions**: বিক্রি (sell), মাল তোলা (
 - **Mobile (<768px, staff):** bottom nav with 3 big buttons, stacked number cards, numpad.
 - **Tab (md, counter):** POS split, product grid left, cart right.
 - **Laptop (lg, owner):** sidebar plus data tables, filters, editing, reports.
-- **XL (2xl, wall screen):** read-only live board, both shops side by side, today's sale, top sellers, alerts, 60s auto-refresh. This is the `/` page in kiosk mode, no extra page.
 
 ## Stack Notes
 - **Data layer:** Drizzle ORM + Neon serverless driver, Server Actions (no separate API).
@@ -65,9 +64,9 @@ Staff do only **3 actions**: বিক্রি (sell), মাল তোলা (
 4. `/stock`
 5. `/` dashboard
 6. `/hisab`
-7. Wall layout
 
 ## Decisions
+- No wall board / kiosk screen: the owner dashboard with the Both toggle covers it.
 - Ready-made dresses use a `product_variants` table (size/color).
 - Customers, suppliers and payments are scoped per shop.
 - Counted cash is stored in `cash_counts`.

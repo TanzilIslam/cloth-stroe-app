@@ -19,7 +19,7 @@ src/
 ├─ db/             Drizzle schema, Neon client, seed
 ├─ lib/            Session, helpers, calculations
 ├─ types/          Shared types (schema.md) + Zod
-├─ hooks/          Client state (cart, auto-refresh)
+├─ hooks/          Client state (cart, session, data loading)
 ├─ app/            Pages + layouts
 └─ components/     UI grouped by page
 ```
@@ -31,14 +31,14 @@ src/
 | DB | `schema`, `index`, `seed` | Tables, connection, sample data |
 | Lib | `session`, `utils`, `calc` | PIN session, formatting (Taka, Bangla digits), profit and reorder math |
 | Types | `index`, `validations` | Interfaces and Zod schemas |
-| Hooks | `use-cart`, `use-auto-refresh` | POS cart, 60s wall refresh |
+| Hooks | `use-cart`, `use-session`, `use-query` | POS cart, current user, page data loading |
 | Config | `middleware`, `drizzle.config` | Route protection, migrations |
 
 ## Frontend (`.tsx`)
 | Page | Purpose | Component group |
 |---|---|---|
 | `/login` | PIN login | `shared` (PinPad) |
-| `/` | Dashboard, plus the wall board on 2xl | `dashboard` |
+| `/` | Dashboard (This shop / Both) | `dashboard` |
 | `/sell` | POS | `sell` |
 | `/stock` | Products, stock in, alerts | `stock` |
 | `/hisab` | Dues, expenses, cash, reports | `hisab` |
@@ -54,6 +54,6 @@ Shared UI (Numpad, StatCard, DataTable, Money) lives in `components/shared/`. sh
 5. `/stock`
 6. `/` dashboard
 7. `/hisab`
-8. Wall layout + PWA
+8. Polish + PWA
 
 Update this file at each step as functions are added.

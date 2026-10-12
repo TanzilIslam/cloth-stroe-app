@@ -86,16 +86,8 @@ When the backend is ready, mock calls are swapped for Server Actions without cha
 
 **Outcome:** the owner understands the day at a glance.
 
-## 8. Wall Board (2xl / kiosk)
-- [ ] `WallBoard`: both shops side by side, read-only
-- [ ] Large type: today's sale, top sellers, alerts
-- [ ] `useAutoRefresh`: 60s refresh
-- [ ] Kiosk mode via `?kiosk=1` or 2xl screen
-
-**Outcome:** a TV screen shows live shop status with no interaction needed.
-
-## 9. Polish & PWA
-- [ ] Responsive check: mobile, tablet, laptop, 2xl
+## 8. Polish & PWA
+- [ ] Responsive check: mobile, tablet, laptop
 - [ ] Loading, empty and error states on every page
 - [ ] Touch targets ≥ 44px, keyboard and focus check
 - [ ] PWA manifest + icons (add to home screen)
