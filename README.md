@@ -6,6 +6,8 @@ Next.js app for the men's and women's shops: sales, stock and hisab.
 - [about.md](docs/about.md): app plan
 - [schema.md](docs/schema.md): enums, types, interfaces
 - [function.md](docs/function.md): function blueprint
+- [task-frontend.md](docs/task-frontend.md): frontend task plan
+- [standup.md](docs/standup.md): daily progress log
 
 ## Scripts
 | Command | Does |
