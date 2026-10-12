@@ -31,7 +31,7 @@ export function Bestsellers({ data }: { data: BestsellersData }) {
               aria-pressed={view === v.key}
               onClick={() => setView(v.key)}
               className={cn(
-                "rounded-md px-2 py-1 text-xs",
+                "rounded-md px-2 py-1 text-xs pointer-coarse:min-h-11",
                 view === v.key
                   ? "bg-secondary font-medium"
                   : "text-muted-foreground"

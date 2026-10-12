@@ -24,7 +24,7 @@ export function AlertsCard({ lowStock, dues }: AlertsCardProps) {
         <section>
           <Link
             href="/stock"
-            className="mb-1 flex items-center gap-2 font-medium"
+            className="mb-1 flex items-center gap-2 font-medium pointer-coarse:min-h-11"
           >
             <Package className="size-4" /> Low stock ({lowStock.length})
           </Link>
@@ -53,7 +53,7 @@ export function AlertsCard({ lowStock, dues }: AlertsCardProps) {
         <section>
           <Link
             href="/hisab"
-            className="mb-1 flex items-center gap-2 font-medium"
+            className="mb-1 flex items-center gap-2 font-medium pointer-coarse:min-h-11"
           >
             <Wallet className="size-4" /> Oldest dues
           </Link>

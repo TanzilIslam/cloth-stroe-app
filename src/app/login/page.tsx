@@ -1,19 +1,28 @@
 "use client"
 
 // PIN login. Staff land on /sell, owner on the dashboard.
+// Already logged in (e.g. opening the installed app) → straight to home.
 import { useRouter } from "next/navigation"
+import { useEffect } from "react"
 
 import { PinPad } from "@/components/shared/pin-pad"
+import { useSession } from "@/hooks/use-session"
 import { login } from "@/mocks"
+import type { Role } from "@/types"
+
+const HOME: Record<Role, string> = { owner: "/", staff: "/sell" }
 
 export default function LoginPage() {
   const router = useRouter()
+  const user = useSession()
+
+  useEffect(() => {
+    if (user) router.replace(HOME[user.role])
+  }, [user, router])
 
   async function handleSubmit(pin: string) {
-    const user = await login(pin)
-    if (!user) return false
-    router.replace(user.role === "owner" ? "/" : "/sell")
-    return true
+    const loggedIn = await login(pin)
+    return !!loggedIn
   }
 
   return (

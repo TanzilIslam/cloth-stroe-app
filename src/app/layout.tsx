@@ -1,4 +1,4 @@
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import { Geist } from "next/font/google"
 import { Toaster } from "@/components/ui/sonner"
 
@@ -12,6 +12,11 @@ const geistSans = Geist({
 export const metadata: Metadata = {
   title: "Shop Dashboard",
   description: "Sales, stock and hisab for the shops",
+  appleWebApp: { capable: true, title: "Shop", statusBarStyle: "default" },
+}
+
+export const viewport: Viewport = {
+  themeColor: "#171717",
 }
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

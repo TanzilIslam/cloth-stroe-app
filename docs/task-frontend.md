@@ -87,11 +87,11 @@ When the backend is ready, mock calls are swapped for Server Actions without cha
 **Outcome:** the owner understands the day at a glance.
 
 ## 8. Polish & PWA
-- [ ] Responsive check: mobile, tablet, laptop
-- [ ] Loading, empty and error states on every page
-- [ ] Touch targets ≥ 44px, keyboard and focus check
-- [ ] PWA manifest + icons (add to home screen)
-- [ ] Final `pnpm validate`
+- [x] Responsive check: mobile, tablet, laptop
+- [x] Loading, empty and error states on every page
+- [x] Touch targets ≥ 44px, keyboard and focus check
+- [x] PWA manifest + icons (add to home screen); no offline mode
+- [x] Final `pnpm validate`
 
 **Outcome:** an installable, responsive app ready to connect to the backend.
 

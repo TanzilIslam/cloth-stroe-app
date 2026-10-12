@@ -83,7 +83,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           {user.role === "owner" ? (
             <button
               type="button"
-              className="text-sm font-medium"
+              className="-ml-2 min-h-11 px-2 text-sm font-medium"
               onClick={() => switchShop(nextShop.id)}
             >
               {shop?.name} ⇄

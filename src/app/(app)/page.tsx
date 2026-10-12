@@ -10,6 +10,7 @@ import { ComparisonCard } from "@/components/dashboard/comparison-card"
 import { PeakTimes } from "@/components/dashboard/peak-times"
 import { TodaySummary } from "@/components/dashboard/today-summary"
 import { PageHeader } from "@/components/layout/page-header"
+import { LoadError, Loading, queryStatus } from "@/components/shared/load-state"
 import { cn } from "@/lib/utils"
 import { useQuery } from "@/hooks/use-query"
 import { useSession } from "@/hooks/use-session"
@@ -43,6 +44,7 @@ export default function DashboardPage() {
     [key]
   )
 
+  const status = queryStatus(stats, comparison, best, peaks, lowStock, dues)
   const shopName = both
     ? "Both shops"
     : shops.find((s) => s.id === user.shopId)?.name
@@ -77,7 +79,7 @@ export default function DashboardPage() {
                 aria-pressed={both === o.value}
                 onClick={() => setBoth(o.value)}
                 className={cn(
-                  "rounded-md px-3 py-1",
+                  "rounded-md px-3 py-1 pointer-coarse:min-h-11",
                   both === o.value
                     ? "bg-background font-medium shadow-sm"
                     : "text-muted-foreground"
@@ -90,8 +92,10 @@ export default function DashboardPage() {
         }
       />
 
-      {stats.loading ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
+      {status.error ? (
+        <LoadError onRetry={status.retry} />
+      ) : stats.loading ? (
+        <Loading />
       ) : (
         <>
           {stats.data && <TodaySummary stats={stats.data} />}

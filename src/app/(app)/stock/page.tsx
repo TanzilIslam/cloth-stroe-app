@@ -7,6 +7,7 @@ import { useState } from "react"
 import { toast } from "sonner"
 
 import { PageHeader } from "@/components/layout/page-header"
+import { LoadError, Loading, queryStatus } from "@/components/shared/load-state"
 import { ProductForm } from "@/components/stock/product-form"
 import { ProductTable } from "@/components/stock/product-table"
 import { StockAlerts } from "@/components/stock/stock-alerts"
@@ -57,6 +58,7 @@ export default function StockPage() {
   const [editing, setEditing] = useState<"new" | ID | null>(null)
   const [stockIn, setStockIn] = useState<StockInTarget | "blank" | null>(null)
 
+  const status = queryStatus(products, suppliers, lowStock, deadStock)
   const all = products.data ?? []
   const visible = isOwner ? all : all.filter((p) => p.active)
   const editProduct =
@@ -103,7 +105,12 @@ export default function StockPage() {
               <PackagePlus /> Stock in
             </Button>
             {isOwner && (
-              <Button variant="outline" onClick={() => setEditing("new")}>
+              <Button
+                variant="outline"
+                className="min-w-11"
+                aria-label="Add product"
+                onClick={() => setEditing("new")}
+              >
                 <Plus /> <span className="hidden sm:inline">Product</span>
               </Button>
             )}
@@ -125,8 +132,10 @@ export default function StockPage() {
         </TabsList>
 
         <TabsContent value="products" className="mt-3">
-          {products.loading ? (
-            <p className="text-sm text-muted-foreground">Loading…</p>
+          {status.error ? (
+            <LoadError onRetry={status.retry} />
+          ) : products.loading ? (
+            <Loading />
           ) : (
             <ProductTable
               products={visible}

@@ -5,6 +5,7 @@ import { useState } from "react"
 import { toast } from "sonner"
 
 import { PageHeader } from "@/components/layout/page-header"
+import { LoadError, Loading, queryStatus } from "@/components/shared/load-state"
 import { CashCountForm } from "@/components/hisab/cash-count-form"
 import { DuesList } from "@/components/hisab/dues-list"
 import { EXPENSE_META } from "@/components/hisab/expense-meta"
@@ -56,6 +57,7 @@ export default function HisabPage() {
   const counts = useQuery(() => getCashCounts(shopId), [shopId])
   const report = useQuery(() => getMonthlyReport([shopId]), [shopId])
 
+  const status = queryStatus(dues, expenses, cash, counts, report)
   const [settling, setSettling] = useState<DueRow | null>(null)
 
   const dueRows = dues.data ?? []
@@ -88,7 +90,10 @@ export default function HisabPage() {
     <div className="flex flex-col gap-4">
       <PageHeader title="Hisab" subtitle={shopName} />
 
-      <Tabs defaultValue="dues">
+      {status.error && <LoadError onRetry={status.retry} />}
+      {dues.loading && <Loading />}
+
+      <Tabs defaultValue="dues" className={dues.loading ? "hidden" : undefined}>
         <TabsList className="w-full sm:w-auto">
           <TabsTrigger value="dues">Dues</TabsTrigger>
           <TabsTrigger value="expenses">Expenses</TabsTrigger>

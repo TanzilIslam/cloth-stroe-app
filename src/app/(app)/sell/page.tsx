@@ -6,6 +6,7 @@ import { useDeferredValue, useState } from "react"
 import { toast } from "sonner"
 
 import { PageHeader } from "@/components/layout/page-header"
+import { LoadError, Loading, queryStatus } from "@/components/shared/load-state"
 import { Money } from "@/components/shared/money"
 import { AddItemDialog } from "@/components/sell/add-item-dialog"
 import { Cart } from "@/components/sell/cart"
@@ -51,6 +52,7 @@ export default function SellPage() {
   )
   const customers = useQuery(() => getParties("customer", shopId), [shopId])
 
+  const status = queryStatus(recent, results, customers)
   const list = query.trim() ? (results.data ?? []) : (recent.data ?? [])
 
   function pickExactMatch() {
@@ -110,8 +112,10 @@ export default function SellPage() {
           </p>
         )}
 
-        {recent.loading ? (
-          <p className="text-sm text-muted-foreground">Loading…</p>
+        {status.error ? (
+          <LoadError onRetry={status.retry} />
+        ) : recent.loading ? (
+          <Loading />
         ) : list.length === 0 ? (
           <p className="text-sm text-muted-foreground">No products found</p>
         ) : (
