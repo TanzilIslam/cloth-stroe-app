@@ -1,4 +1,72 @@
-// Dues sorted by oldest, with WhatsApp reminder button.
-export function DuesList() {
-  return null
+// Dues oldest first: customers who owe us, suppliers we owe.
+// Customers get a WhatsApp reminder link.
+import { MessageCircle } from "lucide-react"
+
+import { Money } from "@/components/shared/money"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { daysSince } from "@/lib/calc"
+import { formatTaka, whatsappLink } from "@/lib/utils"
+import type { DueRow } from "@/types"
+
+interface DuesListProps {
+  rows: DueRow[]
+  shopName: string
+  onSettle: (row: DueRow) => void
+}
+
+export function DuesList({ rows, shopName, onSettle }: DuesListProps) {
+  if (rows.length === 0) {
+    return (
+      <p className="py-6 text-center text-sm text-muted-foreground">
+        No dues 🎉
+      </p>
+    )
+  }
+
+  return (
+    <ul className="flex flex-col divide-y rounded-lg border">
+      {rows.map((row) => {
+        const isCustomer = row.partyType === "customer"
+        const message = `Dear ${row.party.name}, your due at ${shopName} is ${formatTaka(row.amount)}. Thank you, ${shopName}`
+        return (
+          <li
+            key={`${row.partyType}:${row.party.id}`}
+            className="flex flex-wrap items-center gap-3 p-3"
+          >
+            <div className="min-w-0 flex-1">
+              <p className="flex items-center gap-2 font-medium">
+                {row.party.name}
+                <Badge variant={isCustomer ? "secondary" : "outline"}>
+                  {isCustomer ? "Owes us" : "We owe"}
+                </Badge>
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {row.party.phone}
+                {row.since && ` · ${daysSince(row.since)} days`}
+              </p>
+            </div>
+            <Money amount={row.amount} className="font-semibold" />
+            <div className="flex gap-2">
+              {isCustomer && (
+                <Button variant="outline" size="icon" asChild>
+                  <a
+                    href={whatsappLink(row.party.phone, message)}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label={`WhatsApp reminder to ${row.party.name}`}
+                  >
+                    <MessageCircle />
+                  </a>
+                </Button>
+              )}
+              <Button size="sm" onClick={() => onSettle(row)}>
+                {isCustomer ? "Receive" : "Pay"}
+              </Button>
+            </div>
+          </li>
+        )
+      })}
+    </ul>
+  )
 }

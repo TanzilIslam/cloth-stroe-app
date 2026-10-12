@@ -20,3 +20,10 @@ export function formatDate(date: Date) {
     year: "numeric",
   })
 }
+
+/** WhatsApp chat link with a pre-filled message. BD numbers: 01… → 8801… */
+export function whatsappLink(phone: string, message: string) {
+  const digits = phone.replace(/\D/g, "")
+  const intl = digits.startsWith("0") ? `88${digits}` : digits
+  return `https://wa.me/${intl}?text=${encodeURIComponent(message)}`
+}

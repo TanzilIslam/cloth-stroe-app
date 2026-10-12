@@ -68,21 +68,21 @@ When the backend is ready, mock calls are swapped for Server Actions without cha
 **Outcome:** an expense is recorded in 2 taps.
 
 ## 6. Hisab (owner)
-- [ ] Tabs: Dues · Expenses · Cash · Report
-- [ ] `DuesList`: customer / supplier, oldest first, WhatsApp reminder link
-- [ ] `PaymentForm`: receive / pay against a party
-- [ ] `CashCountForm`: expected vs. counted, difference highlighted
-- [ ] `MonthlyReport`: sale, profit, expenses by month and shop
+- [x] Tabs: Dues · Expenses · Cash · Report
+- [x] `DuesList`: customer / supplier, oldest first, WhatsApp reminder link
+- [x] `PaymentForm`: receive / pay against a party
+- [x] `CashCountForm`: expected vs. counted, difference highlighted
+- [x] `MonthlyReport`: sale, profit, expenses by month and shop
 
 **Outcome:** the owner sees all money in and out and who owes what.
 
 ## 7. Dashboard (owner)
-- [ ] `TodaySummary`: sale, profit, cash, dues (`StatCard`)
-- [ ] `ComparisonCard`: today vs. the same day last week
-- [ ] `Bestsellers`: top 5 products / brands / categories
-- [ ] `PeakTimes`: best hour and day
-- [ ] Alerts: low stock, oldest dues
-- [ ] Staff view: today's sale only
+- [x] `TodaySummary`: sale, profit, cash, dues (`StatCard`)
+- [x] `ComparisonCard`: today vs. the same day last week
+- [x] `Bestsellers`: top 5 products / brands / categories
+- [x] `PeakTimes`: best hour and day
+- [x] Alerts: low stock, oldest dues
+- [x] Staff view: today's sale only
 
 **Outcome:** the owner understands the day at a glance.
 

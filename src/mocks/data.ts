@@ -299,7 +299,8 @@ function daysAgo(days: number, hour: number) {
   return d
 }
 
-for (let day = 70; day >= 1; day--) {
+// Day 0 = today, only up to the current time
+for (let day = 70; day >= 0; day--) {
   for (const shop of shops) {
     const pool = products.filter(
       (p) => p.shopId === shop.id && (day > 60 || !DEAD_IDS.includes(p.id))
@@ -320,21 +321,21 @@ for (let day = 70; day >= 1; day--) {
         }
       })
       const total = items.reduce((s, i) => s + i.qty * i.price, 0)
-      const roll = rand()
-      const method = roll < 0.65 ? "cash" : roll < 0.9 ? "bKash" : "due"
-      const due = method === "due" ? total : 0
+      const method = rand() < 0.7 ? "cash" : "bKash"
+      const createdAt = daysAgo(day, 10 + Math.floor(rand() * 11))
+      if (createdAt > new Date()) continue
       saleItems.push(...items)
       sales.push({
         id,
         shopId: shop.id,
         userId: shop.id === 1 ? 2 : 3,
-        customerId: due ? (shop.id === 1 ? 2 : 4) : null,
+        customerId: null,
         total,
         discount: 0,
-        paid: total - due,
-        due,
+        paid: total,
+        due: 0,
         method,
-        createdAt: daysAgo(day, 10 + Math.floor(rand() * 11)),
+        createdAt,
       })
     }
   }
@@ -372,3 +373,61 @@ for (const shop of shops) {
     })
   }
 }
+
+// Opening dues: match the customer / supplier balances above
+const openingDue = (
+  customerId: number,
+  shopId: number,
+  amount: number,
+  day: number
+) => {
+  const id = sales.length + 1
+  const p = products.find((x) => x.shopId === shopId && !x.hasVariants)!
+  saleItems.push({
+    saleId: id,
+    productId: p.id,
+    variantId: null,
+    qty: 1,
+    price: amount,
+    costSnapshot: Math.round(amount * 0.7),
+  })
+  sales.push({
+    id,
+    shopId,
+    userId: shopId === 1 ? 2 : 3,
+    customerId,
+    total: amount,
+    discount: 0,
+    paid: 0,
+    due: amount,
+    method: "due",
+    createdAt: daysAgo(day, 17),
+  })
+}
+openingDue(1, 1, 2500, 40)
+openingDue(3, 2, 1800, 12)
+
+purchases.push(
+  {
+    id: 1,
+    shopId: 1,
+    supplierId: 1,
+    productId: 1,
+    variantId: null,
+    qty: 30,
+    cost: 650,
+    paid: 4500,
+    createdAt: daysAgo(20, 14),
+  },
+  {
+    id: 2,
+    shopId: 2,
+    supplierId: 2,
+    productId: 9,
+    variantId: null,
+    qty: 4,
+    cost: 4500,
+    paid: 10000,
+    createdAt: daysAgo(9, 14),
+  }
+)

@@ -210,3 +210,58 @@ export interface DeadStockRow {
   stock: number
   lastSoldAt: Date | null
 }
+
+export interface PaymentInput {
+  shopId: ID
+  partyType: PartyType
+  partyId: ID
+  amount: Money
+  method: Exclude<PaymentMethod, "due">
+}
+
+export interface DueRow {
+  partyType: PartyType
+  party: Customer | Supplier
+  amount: Money
+  since: Date | null // oldest unpaid sale / purchase
+}
+
+export interface CashSummary {
+  cashSales: Money // cash part of today's sales (refunds negative)
+  cashIn: Money // customer due payments in cash
+  expenses: Money
+  cashOut: Money // supplier payments + stock-in paid
+  lastCounted: Money | null // last count before today = default opening cash
+}
+
+export interface DashboardStats {
+  sale: Money
+  profit: Money // gross: sale - cost - discount
+  cash: Money
+  dues: Money
+  count: number
+}
+
+export interface NamedValue {
+  label: string
+  value: number
+}
+
+export interface Bestsellers {
+  products: NamedValue[]
+  brands: NamedValue[]
+  categories: NamedValue[]
+}
+
+export interface PeakTimes {
+  hours: NamedValue[]
+  days: NamedValue[]
+}
+
+export interface MonthRow {
+  month: string // "Oct 2026"
+  sales: Money
+  gross: Money
+  expenses: Money
+  net: Money
+}

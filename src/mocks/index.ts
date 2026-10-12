@@ -2,14 +2,24 @@
 // src/actions/ is an import change only.
 import { calcReorderQty, daysSince, startOfToday } from "@/lib/calc"
 import type {
+  Bestsellers,
+  CashCount,
+  CashSummary,
   Customer,
+  DashboardStats,
   DeadStockRow,
+  DueRow,
   Expense,
   ExpenseInput,
   ID,
   LowStockRow,
+  MonthRow,
+  NamedValue,
   PartyInput,
   PartyType,
+  Payment,
+  PaymentInput,
+  PeakTimes,
   Product,
   ProductInput,
   ProductVariant,
@@ -25,8 +35,10 @@ import type {
 } from "@/types"
 
 import {
+  cashCounts,
   customers,
   expenses,
+  payments,
   products,
   purchases,
   saleItems,
@@ -438,6 +450,278 @@ export async function getDeadStock(shopId: ID): Promise<DeadStockRow[]> {
     if (!last || daysSince(last) >= 60) {
       rows.push({ product, stock, lastSoldAt: last })
     }
+  }
+  return rows
+}
+
+// --- parties: dues + payments ---
+
+export async function getDues(shopId: ID): Promise<DueRow[]> {
+  await delay()
+  const oldest = (dates: Date[]) =>
+    dates.length ? new Date(Math.min(...dates.map((d) => d.getTime()))) : null
+
+  const rows: DueRow[] = [
+    ...customers
+      .filter((c) => c.shopId === shopId && c.dueBalance > 0)
+      .map((c) => ({
+        partyType: "customer" as const,
+        party: c,
+        amount: c.dueBalance,
+        since: oldest(
+          sales
+            .filter((s) => s.customerId === c.id && s.due > 0)
+            .map((s) => s.createdAt)
+        ),
+      })),
+    ...suppliers
+      .filter((s) => s.shopId === shopId && s.payableBalance > 0)
+      .map((s) => ({
+        partyType: "supplier" as const,
+        party: s,
+        amount: s.payableBalance,
+        since: oldest(
+          purchases
+            .filter((p) => p.supplierId === s.id && p.qty * p.cost > p.paid)
+            .map((p) => p.createdAt)
+        ),
+      })),
+  ]
+  return rows.sort(
+    (a, b) => (a.since?.getTime() ?? 0) - (b.since?.getTime() ?? 0)
+  )
+}
+
+export async function recordPayment(input: PaymentInput): Promise<Payment> {
+  await delay()
+  if (input.amount <= 0) throw new Error("Amount must be more than 0")
+  const party =
+    input.partyType === "customer"
+      ? customers.find((c) => c.id === input.partyId)
+      : suppliers.find((s) => s.id === input.partyId)
+  if (!party) throw new Error("Party not found")
+  const balance =
+    "dueBalance" in party ? party.dueBalance : party.payableBalance
+  if (input.amount > balance) throw new Error("More than the balance")
+
+  if ("dueBalance" in party) party.dueBalance -= input.amount
+  else party.payableBalance -= input.amount
+  const row: Payment = { id: nextId(payments), ...input, date: new Date() }
+  payments.push(row)
+  return row
+}
+
+// --- cash ---
+
+export async function getExpectedCash(shopId: ID): Promise<CashSummary> {
+  await delay()
+  const today = startOfToday()
+  const sum = (xs: number[]) => xs.reduce((a, b) => a + b, 0)
+  const todayPayments = payments.filter(
+    (p) => p.shopId === shopId && p.date >= today && p.method === "cash"
+  )
+  // Opening cash defaults to the last count from a previous day
+  const last = cashCounts
+    .filter((c) => c.shopId === shopId && c.date < today)
+    .at(-1)
+
+  return {
+    cashSales: sum(
+      sales
+        .filter(
+          (s) =>
+            s.shopId === shopId && s.createdAt >= today && s.method === "cash"
+        )
+        .map((s) => s.paid)
+    ),
+    cashIn: sum(
+      todayPayments
+        .filter((p) => p.partyType === "customer")
+        .map((p) => p.amount)
+    ),
+    expenses: sum(
+      expenses
+        .filter((e) => e.shopId === shopId && e.date >= today)
+        .map((e) => e.amount)
+    ),
+    cashOut:
+      sum(
+        todayPayments
+          .filter((p) => p.partyType === "supplier")
+          .map((p) => p.amount)
+      ) +
+      sum(
+        purchases
+          .filter((p) => p.shopId === shopId && p.createdAt >= today)
+          .map((p) => p.paid)
+      ),
+    lastCounted: last?.counted ?? null,
+  }
+}
+
+export async function saveCashCount(input: {
+  shopId: ID
+  userId: ID
+  expected: number
+  counted: number
+}): Promise<CashCount> {
+  await delay()
+  const row: CashCount = {
+    id: nextId(cashCounts),
+    ...input,
+    diff: input.counted - input.expected,
+    date: new Date(),
+  }
+  cashCounts.push(row)
+  return row
+}
+
+export async function getCashCounts(shopId: ID): Promise<CashCount[]> {
+  await delay()
+  return cashCounts.filter((c) => c.shopId === shopId).reverse()
+}
+
+// --- reports ---
+
+const DAY_MS = 24 * 60 * 60 * 1000
+const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+
+function salesIn(shopIds: ID[], from: Date, to = new Date()) {
+  return sales.filter(
+    (s) =>
+      shopIds.includes(s.shopId) && s.createdAt >= from && s.createdAt <= to
+  )
+}
+
+/** Gross profit of a sale: (price - cost) × qty - discount. */
+function saleProfit(saleId: ID, discount: number) {
+  return (
+    saleItems
+      .filter((i) => i.saleId === saleId)
+      .reduce((s, i) => s + (i.price - i.costSnapshot) * i.qty, 0) - discount
+  )
+}
+
+const net = (s: Sale) => s.total - s.discount
+
+export async function getDashboard(shopIds: ID[]): Promise<DashboardStats> {
+  await delay()
+  const today = salesIn(shopIds, startOfToday())
+  return {
+    sale: today.reduce((a, s) => a + net(s), 0),
+    profit: today.reduce((a, s) => a + saleProfit(s.id, s.discount), 0),
+    cash: today
+      .filter((s) => s.method === "cash")
+      .reduce((a, s) => a + s.paid, 0),
+    dues: customers
+      .filter((c) => shopIds.includes(c.shopId))
+      .reduce((a, c) => a + c.dueBalance, 0),
+    count: today.length,
+  }
+}
+
+/** Today so far vs. the same day last week up to the same time. */
+export async function getComparison(
+  shopIds: ID[]
+): Promise<{ today: number; lastWeek: number }> {
+  await delay()
+  const now = new Date()
+  const weekAgo = new Date(now.getTime() - 7 * DAY_MS)
+  const weekAgoStart = new Date(startOfToday().getTime() - 7 * DAY_MS)
+  const total = (xs: Sale[]) => xs.reduce((a, s) => a + net(s), 0)
+  return {
+    today: total(salesIn(shopIds, startOfToday(), now)),
+    lastWeek: total(salesIn(shopIds, weekAgoStart, weekAgo)),
+  }
+}
+
+export async function getBestsellers(
+  shopIds: ID[],
+  days = 30
+): Promise<Bestsellers> {
+  await delay()
+  const ids = new Set(
+    salesIn(shopIds, new Date(Date.now() - days * DAY_MS)).map((s) => s.id)
+  )
+  const by = (key: (p: (typeof products)[number]) => string | null) => {
+    const totals = new Map<string, number>()
+    for (const i of saleItems.filter((i) => ids.has(i.saleId))) {
+      const p = products.find((x) => x.id === i.productId)
+      const k = p && key(p)
+      if (k) totals.set(k, (totals.get(k) ?? 0) + i.qty * i.price)
+    }
+    return [...totals]
+      .map(([label, value]): NamedValue => ({ label, value }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 5)
+  }
+  return {
+    products: by((p) => p.name),
+    brands: by((p) => p.brand),
+    categories: by((p) => p.category),
+  }
+}
+
+export async function getPeakTimes(
+  shopIds: ID[],
+  days = 30
+): Promise<PeakTimes> {
+  await delay()
+  const recent = salesIn(shopIds, new Date(Date.now() - days * DAY_MS))
+  const hours = Array.from({ length: 12 }, (_, i) => i + 10) // 10am–9pm
+  const label = (h: number) => `${h % 12 || 12}${h < 12 ? "a" : "p"}`
+  return {
+    hours: hours.map((h) => ({
+      label: label(h),
+      value: recent
+        .filter((s) => s.createdAt.getHours() === h)
+        .reduce((a, s) => a + net(s), 0),
+    })),
+    // Bangladesh week starts Saturday
+    days: [6, 0, 1, 2, 3, 4, 5].map((d) => ({
+      label: WEEKDAYS[d],
+      value: recent
+        .filter((s) => s.createdAt.getDay() === d)
+        .reduce((a, s) => a + net(s), 0),
+    })),
+  }
+}
+
+export async function getMonthlyReport(
+  shopIds: ID[],
+  months = 6
+): Promise<MonthRow[]> {
+  await delay()
+  const rows: MonthRow[] = []
+  const now = new Date()
+  for (let m = 0; m < months; m++) {
+    const from = new Date(now.getFullYear(), now.getMonth() - m, 1)
+    const to = new Date(now.getFullYear(), now.getMonth() - m + 1, 1)
+    const monthSales = sales.filter(
+      (s) =>
+        shopIds.includes(s.shopId) && s.createdAt >= from && s.createdAt < to
+    )
+    const monthExpenses = expenses
+      .filter(
+        (e) => shopIds.includes(e.shopId) && e.date >= from && e.date < to
+      )
+      .reduce((a, e) => a + e.amount, 0)
+    const salesTotal = monthSales.reduce((a, s) => a + net(s), 0)
+    const gross = monthSales.reduce(
+      (a, s) => a + saleProfit(s.id, s.discount),
+      0
+    )
+    if (!salesTotal && !monthExpenses) continue
+    rows.push({
+      month: from.toLocaleDateString("en-GB", {
+        month: "short",
+        year: "numeric",
+      }),
+      sales: salesTotal,
+      gross,
+      expenses: monthExpenses,
+      net: gross - monthExpenses,
+    })
   }
   return rows
 }
