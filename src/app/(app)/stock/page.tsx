@@ -1,4 +1,6 @@
 // Products, variants, stock in, low and dead stock alerts.
+import { PageHeader } from "@/components/layout/page-header"
+
 export default function StockPage() {
-  return <h1>Stock</h1>
+  return <PageHeader title="Stock" />
 }

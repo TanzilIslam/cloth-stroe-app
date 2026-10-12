@@ -13,27 +13,27 @@ When the backend is ready, mock calls are swapped for Server Actions without cha
 ---
 
 ## 0. Foundation
-- [ ] Types in `src/types/` from `docs/schema.md`
-- [ ] Mock data in `src/mocks/` (shops, users, products, variants, customers, sales)
-- [ ] Mock role switch (owner / staff) for testing views
-- [ ] Shared helpers: `formatTaka`, date format
-- [ ] Add needed shadcn components (badge, tabs, select, sheet)
+- [x] Types in `src/types/` from `docs/schema.md`
+- [x] Mock data in `src/mocks/` (shops, users, products, variants, customers, sales)
+- [x] Mock role switch: log in with owner `1111` or staff `2222` / `3333`
+- [x] Shared helpers: `formatTaka`, date format
+- [x] Add needed shadcn components (badge, tabs, select, sheet)
 
 **Outcome:** typed mock data that any page can import.
 
 ## 1. App Shell & Navigation
-- [ ] `(app)/layout`: bottom nav on mobile, sidebar on `lg`
-- [ ] `BottomNav`: Sell, Stock, Expense (staff)
-- [ ] `Sidebar`: Dashboard, Sell, Stock, Hisab (owner)
-- [ ] `PageHeader`: title + current shop
-- [ ] Hide owner-only links for staff
+- [x] `(app)/layout`: bottom nav on mobile, sidebar on `lg`
+- [x] `BottomNav`: Sell, Stock, Expense (staff)
+- [x] `Sidebar`: Dashboard, Sell, Stock, Hisab (owner)
+- [x] `PageHeader`: title + current shop
+- [x] Hide owner-only links for staff
 
 **Outcome:** every page is reachable with the correct nav per role and screen size.
 
 ## 2. Login
-- [ ] `PinPad`: 4 dots + numpad, auto-submit on the 4th digit
-- [ ] Wrong PIN shake / error state
-- [ ] Mock login → redirect (staff → `/sell`, owner → `/`)
+- [x] `PinPad`: 4 dots + numpad, auto-submit on the 4th digit
+- [x] Wrong PIN shake / error state
+- [x] Mock login → redirect (staff → `/sell`, owner → `/`)
 
 **Outcome:** a user can "log in" with a mock PIN and lands on their home page.
 

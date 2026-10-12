@@ -1,4 +1,6 @@
 // Owner only: dues, payments, expenses, cash count, monthly report.
+import { PageHeader } from "@/components/layout/page-header"
+
 export default function HisabPage() {
-  return <h1>Hisab</h1>
+  return <PageHeader title="Hisab" />
 }
