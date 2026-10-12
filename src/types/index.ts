@@ -145,3 +145,32 @@ export interface CashCount {
 
 /** Logged-in user, never includes pinHash. */
 export type SessionUser = Omit<User, "pinHash">
+
+export interface ProductWithVariants extends Product {
+  variants: ProductVariant[]
+}
+
+// Inputs for write actions (Zod schemas mirror these later)
+
+export interface SaleItemInput {
+  productId: ID
+  variantId: ID | null
+  qty: number // negative = return
+  price: Money
+}
+
+export interface SaleInput {
+  shopId: ID
+  userId: ID
+  customerId: ID | null
+  items: SaleItemInput[]
+  discount: Money
+  paid: Money // negative = refund
+  method: PaymentMethod
+}
+
+export interface PartyInput {
+  shopId: ID
+  name: string
+  phone: string
+}

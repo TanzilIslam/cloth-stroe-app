@@ -3,6 +3,8 @@ import type {
   Customer,
   Product,
   ProductVariant,
+  Sale,
+  SaleItem,
   Shop,
   Supplier,
   User,
@@ -265,3 +267,6 @@ export const suppliers: Supplier[] = [
     payableBalance: 8000,
   },
 ]
+
+export const sales: Sale[] = []
+export const saleItems: SaleItem[] = []

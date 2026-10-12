@@ -38,16 +38,16 @@ When the backend is ready, mock calls are swapped for Server Actions without cha
 **Outcome:** a user can "log in" with a mock PIN and lands on their home page.
 
 ## 3. Sell (POS): main staff flow
-- [ ] `ProductSearch`: search by name / barcode
-- [ ] `ProductTile`: favorite and recent product grid
-- [ ] Variant picker (size / color) for ready-made dresses
-- [ ] `QtyChips` (1 / 2 / 2.5 / 3) + `Numpad` for custom qty
-- [ ] `useCart`: add, remove, change qty, discount, total
-- [ ] `Cart`: item list + total; side panel on tablet, bottom sheet on mobile
-- [ ] `PayDialog`: cash / bKash / due, paid amount, change or due shown
-- [ ] Customer pick / quick add when there's a due
-- [ ] Success toast, then the cart resets
-- [ ] Return: negative qty item
+- [x] `ProductSearch`: search by name / barcode
+- [x] `ProductTile`: favorite and recent product grid
+- [x] Variant picker (size / color) for ready-made dresses
+- [x] `QtyChips` (1 / 2 / 2.5 / 3) + `Numpad` for custom qty
+- [x] `useCart`: add, remove, change qty, discount, total
+- [x] `Cart`: item list + total; side panel on tablet, bottom sheet on mobile
+- [x] `PayDialog`: cash / bKash / due, paid amount, change or due shown
+- [x] Customer pick / quick add when there's a due
+- [x] Success toast, then the cart resets
+- [x] Return: negative qty item
 
 **Outcome:** sell in 3 taps (tile → qty → pay), on both mobile and tablet.
 
