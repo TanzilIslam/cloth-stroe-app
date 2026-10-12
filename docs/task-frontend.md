@@ -5,6 +5,11 @@ When the backend is ready, mock calls are swapped for Server Actions without cha
 
 **Rules:** mobile first · big buttons · cost and profit hidden from staff · run `pnpm validate` before each push.
 
+**No-rewrite rules** (so the backend swap needs no UI changes):
+1. Types come from `docs/schema.md`.
+2. All data goes through one layer (`src/mocks/` now, `src/actions/` later), using the same function names as `docs/function.md`.
+3. Components receive data and handlers through props and never fetch on their own.
+
 ---
 
 ## 0. Foundation
