@@ -1,0 +1,104 @@
+# Frontend Tasks
+
+Built in user-journey order with **mock data only** (no backend). Each task ends with a clear outcome.
+When the backend is ready, mock calls are swapped for Server Actions without changing the UI.
+
+**Rules:** mobile first · big buttons · cost and profit hidden from staff · run `pnpm validate` before each push.
+
+---
+
+## 0. Foundation
+- [ ] Types in `src/types/` from `docs/schema.md`
+- [ ] Mock data in `src/mocks/` (shops, users, products, variants, customers, sales)
+- [ ] Mock role switch (owner / staff) for testing views
+- [ ] Shared helpers: `formatTaka`, date format
+- [ ] Add needed shadcn components (badge, tabs, select, sheet)
+
+**Outcome:** typed mock data that any page can import.
+
+## 1. App Shell & Navigation
+- [ ] `(app)/layout`: bottom nav on mobile, sidebar on `lg`
+- [ ] `BottomNav`: Sell, Stock, Expense (staff)
+- [ ] `Sidebar`: Dashboard, Sell, Stock, Hisab (owner)
+- [ ] `PageHeader`: title + current shop
+- [ ] Hide owner-only links for staff
+
+**Outcome:** every page is reachable with the correct nav per role and screen size.
+
+## 2. Login
+- [ ] `PinPad`: 4 dots + numpad, auto-submit on the 4th digit
+- [ ] Wrong PIN shake / error state
+- [ ] Mock login → redirect (staff → `/sell`, owner → `/`)
+
+**Outcome:** a user can "log in" with a mock PIN and lands on their home page.
+
+## 3. Sell (POS): main staff flow
+- [ ] `ProductSearch`: search by name / barcode
+- [ ] `ProductTile`: favorite and recent product grid
+- [ ] Variant picker (size / color) for ready-made dresses
+- [ ] `QtyChips` (1 / 2 / 2.5 / 3) + `Numpad` for custom qty
+- [ ] `useCart`: add, remove, change qty, discount, total
+- [ ] `Cart`: item list + total; side panel on tablet, bottom sheet on mobile
+- [ ] `PayDialog`: cash / bKash / due, paid amount, change or due shown
+- [ ] Customer pick / quick add when there's a due
+- [ ] Success toast, then the cart resets
+- [ ] Return: negative qty item
+
+**Outcome:** sell in 3 taps (tile → qty → pay), on both mobile and tablet.
+
+## 4. Stock
+- [ ] `ProductTable`: list, search, filter by category, stock qty
+- [ ] `ProductForm`: create / edit, unit, prices, low-stock level
+- [ ] `VariantForm`: add size / color rows
+- [ ] `StockInForm`: product → qty → cost (pre-filled), supplier
+- [ ] `StockAlerts`: low stock + reorder suggestion, dead stock (60+ days)
+- [ ] Hide cost price for staff
+
+**Outcome:** products can be browsed, added, edited and restocked, with alerts visible.
+
+## 5. Expense (staff + owner)
+- [ ] `ExpenseForm`: category icons → amount numpad → save
+- [ ] Today's expense list
+
+**Outcome:** an expense is recorded in 2 taps.
+
+## 6. Hisab (owner)
+- [ ] Tabs: Dues · Expenses · Cash · Report
+- [ ] `DuesList`: customer / supplier, oldest first, WhatsApp reminder link
+- [ ] `PaymentForm`: receive / pay against a party
+- [ ] `CashCountForm`: expected vs. counted, difference highlighted
+- [ ] `MonthlyReport`: sale, profit, expenses by month and shop
+
+**Outcome:** the owner sees all money in and out and who owes what.
+
+## 7. Dashboard (owner)
+- [ ] `TodaySummary`: sale, profit, cash, dues (`StatCard`)
+- [ ] `ComparisonCard`: today vs. the same day last week
+- [ ] `Bestsellers`: top 5 products / brands / categories
+- [ ] `PeakTimes`: best hour and day
+- [ ] Alerts: low stock, oldest dues
+- [ ] Staff view: today's sale only
+
+**Outcome:** the owner understands the day at a glance.
+
+## 8. Wall Board (2xl / kiosk)
+- [ ] `WallBoard`: both shops side by side, read-only
+- [ ] Large type: today's sale, top sellers, alerts
+- [ ] `useAutoRefresh`: 60s refresh
+- [ ] Kiosk mode via `?kiosk=1` or 2xl screen
+
+**Outcome:** a TV screen shows live shop status with no interaction needed.
+
+## 9. Polish & PWA
+- [ ] Responsive check: mobile, tablet, laptop, 2xl
+- [ ] Loading, empty and error states on every page
+- [ ] Touch targets ≥ 44px, keyboard and focus check
+- [ ] PWA manifest + icons (add to home screen)
+- [ ] Final `pnpm validate`
+
+**Outcome:** an installable, responsive app ready to connect to the backend.
+
+---
+
+## Backend Hand-off
+Mock function names should match `docs/function.md` (e.g. `createSale`, `getProducts`) so the swap is a one-line import change.
