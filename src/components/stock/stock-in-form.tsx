@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import type { ID, ProductWithVariants, PurchaseInput, Supplier } from "@/types"
+import { variantLabel } from "@/lib/utils"
 
 export type StockInValues = Omit<PurchaseInput, "shopId">
 
@@ -129,7 +130,7 @@ export function StockInForm({
             <SelectContent>
               {product.variants.map((v) => (
                 <SelectItem key={v.id} value={String(v.id)}>
-                  {[v.size, v.color].filter(Boolean).join(" · ")} ({v.stockQty})
+                  {variantLabel(v)} ({v.stockQty})
                 </SelectItem>
               ))}
             </SelectContent>

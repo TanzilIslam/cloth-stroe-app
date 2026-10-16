@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/button"
 import { daysSince } from "@/lib/calc"
 import type { DeadStockRow, ID, LowStockRow } from "@/types"
+import { variantLabel } from "@/lib/utils"
 
 interface StockAlertsProps {
   lowStock: LowStockRow[]
@@ -35,10 +36,7 @@ export function StockAlerts({
                   {variant && (
                     <span className="text-muted-foreground">
                       {" "}
-                      ·{" "}
-                      {[variant.size, variant.color]
-                        .filter(Boolean)
-                        .join(" · ")}
+                      · {variantLabel(variant)}
                     </span>
                   )}
                 </p>

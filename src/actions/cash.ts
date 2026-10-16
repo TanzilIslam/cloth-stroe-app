@@ -1,25 +1,23 @@
 "use server"
 
 // Cash check: today's cash flows (expected) vs. counted cash.
-import { and, desc, eq, gte, lt, sql } from "drizzle-orm"
+import { and, desc, eq, gte, lt } from "drizzle-orm"
 
 import { db } from "@/db"
 import { cashCounts, expenses, payments, purchases, sales } from "@/db/schema"
-import { todayStart } from "@/db/time"
+import { sum, todayStart } from "@/db/sql"
 import { parse, run } from "@/lib/action"
+import { roundMoney } from "@/lib/calc"
 import { requireShop } from "@/lib/session"
 import type { CashSummary, ID } from "@/types"
 import { cashCountSchema, idSchema } from "@/types/validations"
-
-const total = (col: unknown) =>
-  sql<number>`coalesce(sum(${col}), 0)`.mapWith(Number)
 
 export async function getExpectedCash(shopId: ID) {
   return run(async (): Promise<CashSummary> => {
     await requireShop(parse(idSchema, shopId))
     const [[s], [cin], [cout], [e], [p], [last]] = await Promise.all([
       db
-        .select({ v: total(sales.paid) })
+        .select({ v: sum(sales.paid) })
         .from(sales)
         .where(
           and(
@@ -29,7 +27,7 @@ export async function getExpectedCash(shopId: ID) {
           )
         ),
       db
-        .select({ v: total(payments.amount) })
+        .select({ v: sum(payments.amount) })
         .from(payments)
         .where(
           and(
@@ -40,7 +38,7 @@ export async function getExpectedCash(shopId: ID) {
           )
         ),
       db
-        .select({ v: total(payments.amount) })
+        .select({ v: sum(payments.amount) })
         .from(payments)
         .where(
           and(
@@ -51,13 +49,13 @@ export async function getExpectedCash(shopId: ID) {
           )
         ),
       db
-        .select({ v: total(expenses.amount) })
+        .select({ v: sum(expenses.amount) })
         .from(expenses)
         .where(
           and(eq(expenses.shopId, shopId), gte(expenses.date, todayStart))
         ),
       db
-        .select({ v: total(purchases.paid) })
+        .select({ v: sum(purchases.paid) })
         .from(purchases)
         .where(
           and(
@@ -100,7 +98,7 @@ export async function saveCashCount(input: {
         userId: user.id,
         expected: input.expected,
         counted: input.counted,
-        diff: input.counted - input.expected,
+        diff: roundMoney(input.counted - input.expected),
       })
       .returning()
     return row

@@ -2,6 +2,7 @@
 // Columns are camelCase in TS and snake_case in Postgres (casing: "snake_case").
 import {
   boolean,
+  check,
   index,
   integer,
   numeric,
@@ -11,6 +12,7 @@ import {
   text,
   timestamp,
 } from "drizzle-orm/pg-core"
+import { sql } from "drizzle-orm"
 
 import {
   EXPENSE_CATEGORIES,
@@ -76,7 +78,15 @@ export const products = pgTable(
     hasVariants: boolean().notNull().default(false),
     active: boolean().notNull().default(true),
   },
-  (t) => [index().on(t.shopId), index().on(t.barcode)]
+  (t) => [
+    index().on(t.shopId),
+    index().on(t.barcode),
+    check("products_stock_ok", sql`${t.stockQty} >= 0`),
+    check(
+      "products_prices_ok",
+      sql`${t.costPrice} >= 0 and ${t.sellPrice} >= 0`
+    ),
+  ]
 )
 
 export const productVariants = pgTable(
@@ -91,7 +101,10 @@ export const productVariants = pgTable(
     stockQty: qty().notNull().default(0),
     barcode: text(),
   },
-  (t) => [index().on(t.productId)]
+  (t) => [
+    index().on(t.productId),
+    check("variants_stock_ok", sql`${t.stockQty} >= 0`),
+  ]
 )
 
 export const customers = pgTable(
@@ -103,7 +116,10 @@ export const customers = pgTable(
     phone: text().notNull(),
     dueBalance: money().notNull().default(0),
   },
-  (t) => [index().on(t.shopId)]
+  (t) => [
+    index().on(t.shopId),
+    check("customers_due_ok", sql`${t.dueBalance} >= 0`),
+  ]
 )
 
 export const suppliers = pgTable(
@@ -115,7 +131,10 @@ export const suppliers = pgTable(
     phone: text().notNull(),
     payableBalance: money().notNull().default(0),
   },
-  (t) => [index().on(t.shopId)]
+  (t) => [
+    index().on(t.shopId),
+    check("suppliers_payable_ok", sql`${t.payableBalance} >= 0`),
+  ]
 )
 
 export const sales = pgTable(
@@ -152,7 +171,12 @@ export const saleItems = pgTable(
     price: money().notNull(),
     costSnapshot: money().notNull(),
   },
-  (t) => [index().on(t.saleId), index().on(t.productId)]
+  (t) => [
+    index().on(t.saleId),
+    index().on(t.productId),
+    check("sale_items_qty_ok", sql`${t.qty} <> 0`),
+    check("sale_items_price_ok", sql`${t.price} >= 0`),
+  ]
 )
 
 export const purchases = pgTable(
@@ -172,7 +196,12 @@ export const purchases = pgTable(
     paid: money().notNull().default(0),
     createdAt: createdAt(),
   },
-  (t) => [index().on(t.shopId, t.createdAt), index().on(t.productId)]
+  (t) => [
+    index().on(t.shopId, t.createdAt),
+    index().on(t.productId),
+    check("purchases_qty_ok", sql`${t.qty} > 0`),
+    check("purchases_money_ok", sql`${t.cost} >= 0 and ${t.paid} >= 0`),
+  ]
 )
 
 export const expenses = pgTable(
@@ -185,7 +214,10 @@ export const expenses = pgTable(
     note: text(),
     date: createdAt(),
   },
-  (t) => [index().on(t.shopId, t.date)]
+  (t) => [
+    index().on(t.shopId, t.date),
+    check("expenses_amount_ok", sql`${t.amount} > 0`),
+  ]
 )
 
 export const payments = pgTable(
@@ -199,7 +231,10 @@ export const payments = pgTable(
     method: paymentMethod().notNull(),
     date: createdAt(),
   },
-  (t) => [index().on(t.shopId, t.date)]
+  (t) => [
+    index().on(t.shopId, t.date),
+    check("payments_amount_ok", sql`${t.amount} > 0`),
+  ]
 )
 
 export const cashCounts = pgTable(

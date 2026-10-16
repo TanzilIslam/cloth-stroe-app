@@ -6,6 +6,7 @@ import { asc, eq } from "drizzle-orm"
 import { db } from "@/db"
 import { shops, users } from "@/db/schema"
 import { ActionError, parse, run } from "@/lib/action"
+import { ERRORS } from "@/lib/errors"
 import {
   assertNotLocked,
   clearFailures,
@@ -79,7 +80,7 @@ export async function switchShop(shopId: number) {
     const user = await requireOwner()
     shopId = parse(idSchema, shopId)
     const [shop] = await db.select().from(shops).where(eq(shops.id, shopId))
-    if (!shop) throw new ActionError("Shop not found")
+    if (!shop) throw new ActionError(ERRORS.shopNotFound)
     const next = { ...user, shopId }
     await setSession(next)
     return next

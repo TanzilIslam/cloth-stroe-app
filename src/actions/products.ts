@@ -7,6 +7,7 @@ import { db } from "@/db"
 import { forUser, withVariants } from "@/db/products"
 import { products, productVariants, saleItems, shops } from "@/db/schema"
 import { ActionError, parse, run } from "@/lib/action"
+import { ERRORS } from "@/lib/errors"
 import { requireOwner, requireShop, requireUser } from "@/lib/session"
 import type { ID, ProductInput, VariantInput } from "@/types"
 import {
@@ -48,7 +49,7 @@ export async function createProduct(input: ProductInput) {
       .select()
       .from(shops)
       .where(eq(shops.id, input.shopId))
-    if (!shop) throw new ActionError("Shop not found")
+    if (!shop) throw new ActionError(ERRORS.shopNotFound)
     const [row] = await db
       .insert(products)
       .values({ ...input, stockQty: input.hasVariants ? 0 : input.stockQty })
@@ -78,7 +79,7 @@ export async function updateProduct(id: ID, input: Partial<ProductInput>) {
       .set(fields)
       .where(eq(products.id, id))
       .returning()
-    if (!row) throw new ActionError("Product not found")
+    if (!row) throw new ActionError(ERRORS.productNotFound)
     return row
   })
 }
@@ -88,7 +89,7 @@ export async function toggleProductActive(id: ID) {
     await requireOwner()
     id = parse(idSchema, id)
     const [row] = await db.select().from(products).where(eq(products.id, id))
-    if (!row) throw new ActionError("Product not found")
+    if (!row) throw new ActionError(ERRORS.productNotFound)
     const [updated] = await db
       .update(products)
       .set({ active: !row.active })
@@ -112,14 +113,14 @@ export async function saveVariant(input: VariantInput) {
         .set(fields)
         .where(eq(productVariants.id, input.id))
         .returning()
-      if (!row) throw new ActionError("Variant not found")
+      if (!row) throw new ActionError(ERRORS.variantNotFound)
       return row
     }
     const [product] = await db
       .select()
       .from(products)
       .where(eq(products.id, input.productId))
-    if (!product?.hasVariants) throw new ActionError("Product has no variants")
+    if (!product?.hasVariants) throw new ActionError(ERRORS.noVariants)
     const [row] = await db
       .insert(productVariants)
       .values({
@@ -141,12 +142,12 @@ export async function deleteVariant(id: ID) {
       .from(productVariants)
       .where(eq(productVariants.id, id))
     if (!v) return
-    if (v.stockQty !== 0) throw new ActionError("Variant still has stock")
+    if (v.stockQty !== 0) throw new ActionError(ERRORS.variantHasStock)
     const [{ n }] = await db
       .select({ n: count() })
       .from(saleItems)
       .where(and(eq(saleItems.variantId, id)))
-    if (n > 0) throw new ActionError("Variant has sales, can't delete")
+    if (n > 0) throw new ActionError(ERRORS.variantHasSales)
     await db.delete(productVariants).where(eq(productVariants.id, id))
   })
 }

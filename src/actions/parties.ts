@@ -6,6 +6,7 @@ import { and, asc, eq, gt, min, sql, type AnyColumn } from "drizzle-orm"
 import { db } from "@/db"
 import { customers, payments, purchases, sales, suppliers } from "@/db/schema"
 import { ActionError, parse, run } from "@/lib/action"
+import { ERRORS } from "@/lib/errors"
 import type { Result } from "@/lib/result"
 import { requireOwner, requireShop } from "@/lib/session"
 import type {
@@ -61,7 +62,7 @@ export async function saveParty(type: PartyType, input: PartyInput) {
     // Opening balance: owner only, when moving existing dues into the app
     const opening = input.openingBalance ?? 0
     if (opening > 0 && user.role !== "owner")
-      throw new ActionError("Owner only")
+      throw new ActionError(ERRORS.ownerOnly)
     const values = {
       shopId: input.shopId,
       name: input.name,
@@ -94,7 +95,7 @@ export async function updateParty(type: PartyType, id: ID, input: PartyInput) {
       .set({ name: input.name, phone: input.phone })
       .where(and(eq(table.id, id), eq(table.shopId, input.shopId)))
       .returning()
-    if (!row) throw new ActionError("Not found")
+    if (!row) throw new ActionError(ERRORS.notFound)
     return row
   })
 }
@@ -178,7 +179,7 @@ export async function recordPayment(input: PaymentInput) {
               })
               .where(where(suppliers, suppliers.payableBalance))
               .returning({ id: suppliers.id })
-      if (!updated) throw new ActionError("More than the balance")
+      if (!updated) throw new ActionError(ERRORS.moreThanBalance)
 
       const [row] = await tx.insert(payments).values(input).returning()
       return row

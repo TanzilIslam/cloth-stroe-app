@@ -2,11 +2,12 @@
 // Real checks (valid cookie, role, shop) run in every Server Action.
 import { NextResponse, type NextRequest } from "next/server"
 
-const COOKIE = "shop_session" // keep in sync with lib/session.ts
+import { SESSION_COOKIE } from "@/lib/config"
+import { ROUTES } from "@/lib/routes"
 
 export function proxy(request: NextRequest) {
-  if (!request.cookies.has(COOKIE)) {
-    return NextResponse.redirect(new URL("/login", request.url))
+  if (!request.cookies.has(SESSION_COOKIE)) {
+    return NextResponse.redirect(new URL(ROUTES.login, request.url))
   }
 }
 

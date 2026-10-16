@@ -7,6 +7,7 @@ import { and, asc, count, eq, gt, ne } from "drizzle-orm"
 import { db } from "@/db"
 import { loginAttempts, users } from "@/db/schema"
 import { ActionError, parse, run } from "@/lib/action"
+import { ERRORS } from "@/lib/errors"
 import { hashPin, requireOwner, verifyPin } from "@/lib/session"
 import type { ID, UserInput, UserRow } from "@/types"
 import { idSchema, userSchema } from "@/types/validations"
@@ -36,7 +37,7 @@ async function keepAnOwner(id: ID) {
     .where(
       and(eq(users.role, "owner"), eq(users.active, true), ne(users.id, id))
     )
-  if (n === 0) throw new ActionError("At least one active owner is needed")
+  if (n === 0) throw new ActionError(ERRORS.needAnOwner)
 }
 
 export async function getUsers() {
@@ -53,9 +54,8 @@ export async function createUser(input: UserInput) {
   return run(async (): Promise<UserRow> => {
     await requireOwner()
     const data = parse(userSchema, input)
-    if (!data.pin) throw new ActionError("PIN is required")
-    if (await pinTaken(data.pin))
-      throw new ActionError("PIN already used, pick another")
+    if (!data.pin) throw new ActionError(ERRORS.pinRequired)
+    if (await pinTaken(data.pin)) throw new ActionError(ERRORS.pinTaken)
     const [row] = await db
       .insert(users)
       .values({
@@ -76,7 +76,7 @@ export async function updateUser(id: ID, input: UserInput) {
     const data = parse(userSchema, input)
     if (data.role !== "owner") await keepAnOwner(id)
     if (data.pin && (await pinTaken(data.pin, id))) {
-      throw new ActionError("PIN already used, pick another")
+      throw new ActionError(ERRORS.pinTaken)
     }
     const [row] = await db
       .update(users)
@@ -88,7 +88,7 @@ export async function updateUser(id: ID, input: UserInput) {
       })
       .where(eq(users.id, id))
       .returning(columns)
-    if (!row) throw new ActionError("User not found")
+    if (!row) throw new ActionError(ERRORS.userNotFound)
     return row
   })
 }
@@ -99,7 +99,7 @@ export async function setUserActive(id: ID, active: boolean) {
     const me = await requireOwner()
     id = parse(idSchema, id)
     if (!active) {
-      if (id === me.id) throw new ActionError("You can't deactivate yourself")
+      if (id === me.id) throw new ActionError(ERRORS.cantDeactivateSelf)
       await keepAnOwner(id)
     }
     const [row] = await db
@@ -107,7 +107,7 @@ export async function setUserActive(id: ID, active: boolean) {
       .set({ active: active === true })
       .where(eq(users.id, id))
       .returning(columns)
-    if (!row) throw new ActionError("User not found")
+    if (!row) throw new ActionError(ERRORS.userNotFound)
     return row
   })
 }

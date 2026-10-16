@@ -5,7 +5,7 @@ import { and, desc, eq, gte } from "drizzle-orm"
 
 import { db } from "@/db"
 import { expenses } from "@/db/schema"
-import { todayStart } from "@/db/time"
+import { todayStart } from "@/db/sql"
 import { parse, run } from "@/lib/action"
 import { requireOwner, requireShop } from "@/lib/session"
 import type { ExpenseInput, ID } from "@/types"

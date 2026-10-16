@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { cn } from "@/lib/utils"
+import { cn, variantLabel } from "@/lib/utils"
 import type { ProductVariant, ProductWithVariants } from "@/types"
 
 import { QtyChips } from "./qty-chips"
@@ -78,9 +78,7 @@ export function AddItemDialog({
                     v.id === variantId && "border-primary bg-accent"
                   )}
                 >
-                  <span className="block font-medium">
-                    {[v.size, v.color].filter(Boolean).join(" · ")}
-                  </span>
+                  <span className="block font-medium">{variantLabel(v)}</span>
                   <span className="text-xs text-muted-foreground">
                     {left} left
                   </span>

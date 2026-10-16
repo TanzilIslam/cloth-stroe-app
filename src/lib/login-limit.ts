@@ -10,6 +10,7 @@ import { db } from "@/db"
 import { loginAttempts } from "@/db/schema"
 
 import { ActionError } from "./action"
+import { ERRORS } from "./errors"
 
 export const MAX_FAILURES = 5
 export const WINDOW_MIN = 15
@@ -27,7 +28,7 @@ export async function clientIp() {
 
 function lockedMessage(until: Date) {
   const min = Math.max(1, Math.ceil((until.getTime() - Date.now()) / 60000))
-  return `Too many wrong PINs. Try again in ${min} min`
+  return ERRORS.tooManyPins(min)
 }
 
 /** Throws if this device is locked right now. */

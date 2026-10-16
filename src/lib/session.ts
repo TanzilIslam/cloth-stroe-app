@@ -13,15 +13,15 @@ import { users } from "@/db/schema"
 import type { ID, SessionUser } from "@/types"
 
 import { ActionError } from "./action"
+import { SESSION_COOKIE } from "./config"
+import { env } from "./env"
+import { ERRORS } from "./errors"
 
-const COOKIE = "shop_session"
+const COOKIE = SESSION_COOKIE
 const MAX_AGE = 60 * 60 * 24 * 30 // 30 days
 
 function secret() {
-  const s = process.env.SESSION_SECRET
-  if (!s || s.length < 32)
-    throw new Error("SESSION_SECRET must be 32+ characters")
-  return s
+  return env().SESSION_SECRET
 }
 
 export async function getSession(): Promise<SessionUser | null> {
@@ -81,13 +81,13 @@ export async function currentUser(): Promise<SessionUser | null> {
 
 export async function requireUser(): Promise<SessionUser> {
   const user = await currentUser()
-  if (!user) throw new ActionError("Please log in again")
+  if (!user) throw new ActionError(ERRORS.loginAgain)
   return user
 }
 
 export async function requireOwner(): Promise<SessionUser> {
   const user = await requireUser()
-  if (user.role !== "owner") throw new ActionError("Owner only")
+  if (user.role !== "owner") throw new ActionError(ERRORS.ownerOnly)
   return user
 }
 
@@ -95,7 +95,7 @@ export async function requireOwner(): Promise<SessionUser> {
 export async function requireShop(shopId: ID): Promise<SessionUser> {
   const user = await requireUser()
   if (user.role !== "owner" && user.shopId !== shopId) {
-    throw new ActionError("Not your shop")
+    throw new ActionError(ERRORS.notYourShop)
   }
   return user
 }
@@ -103,6 +103,3 @@ export async function requireShop(shopId: ID): Promise<SessionUser> {
 export const hashPin = (pin: string) => bcrypt.hash(pin, 10)
 export const verifyPin = (pin: string, hash: string) =>
   bcrypt.compare(pin, hash)
-
-/** Name of the session cookie, for the proxy's quick check. */
-export const SESSION_COOKIE = COOKIE

@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import type { Cart as CartState, CartItem } from "@/hooks/use-cart"
+import { variantLabel } from "@/lib/utils"
 
 interface CartProps {
   cart: CartState
@@ -42,10 +43,7 @@ export function Cart({ cart, onPay }: CartProps) {
                 <div className="min-w-0">
                   <p className="truncate font-medium">{item.product.name}</p>
                   <p className="text-xs text-muted-foreground">
-                    {item.variant &&
-                      [item.variant.size, item.variant.color]
-                        .filter(Boolean)
-                        .join(" · ") + " · "}
+                    {item.variant && variantLabel(item.variant) + " · "}
                     <Money amount={item.price} /> / {item.product.unit}
                   </p>
                 </div>

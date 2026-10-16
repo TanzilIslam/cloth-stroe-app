@@ -8,6 +8,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import type { ProductVariant } from "@/types"
+import { variantLabel } from "@/lib/utils"
 
 interface VariantFormProps {
   variants: ProductVariant[]
@@ -55,9 +56,7 @@ export function VariantForm({ variants, onAdd, onDelete }: VariantFormProps) {
             key={v.id}
             className="flex items-center justify-between gap-2 px-3 py-2"
           >
-            <span className="text-sm">
-              {[v.size, v.color].filter(Boolean).join(" · ")}
-            </span>
+            <span className="text-sm">{variantLabel(v)}</span>
             <span className="ml-auto text-sm text-muted-foreground">
               {v.stockQty} in stock
             </span>

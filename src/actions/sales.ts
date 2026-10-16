@@ -13,9 +13,12 @@ import {
   sales,
   users,
 } from "@/db/schema"
-import { dayStart } from "@/db/time"
+import { dayStart } from "@/db/sql"
 import { ActionError, parse, run } from "@/lib/action"
+import { ERRORS } from "@/lib/errors"
+import { roundMoney } from "@/lib/calc"
 import { requireShop } from "@/lib/session"
+import { variantLabel } from "@/lib/utils"
 import type { ID, SaleDetail, SaleInput } from "@/types"
 import {
   daySchema,
@@ -72,18 +75,22 @@ export async function createSale(raw: SaleInput) {
     const input = parse(saleSchema, raw)
     const user = await requireShop(input.shopId)
 
-    const total = input.items.reduce((s, i) => s + i.qty * i.price, 0)
-    const net = total - input.discount
+    const total = roundMoney(
+      input.items.reduce((s, i) => s + i.qty * i.price, 0)
+    )
+    const net = roundMoney(total - input.discount)
     const refund = net < 0
-    const paid = refund ? net : Math.min(Math.max(0, input.paid), net)
-    const due = refund ? 0 : net - paid
+    const paid = roundMoney(
+      refund ? net : Math.min(Math.max(0, input.paid), net)
+    )
+    const due = refund ? 0 : roundMoney(net - paid)
     const method = refund
       ? "cash"
       : paid === 0 && net > 0
         ? "due"
         : input.method
     if (due > 0 && !input.customerId)
-      throw new ActionError("Pick a customer for the due amount")
+      throw new ActionError(ERRORS.dueNeedsCustomer)
 
     return db.transaction(async (tx) => {
       if (input.customerId) {
@@ -96,7 +103,7 @@ export async function createSale(raw: SaleInput) {
               eq(customers.shopId, input.shopId)
             )
           )
-        if (!c) throw new ActionError("Customer not found")
+        if (!c) throw new ActionError(ERRORS.customerNotFound)
       }
 
       const [sale] = await tx
@@ -132,7 +139,7 @@ export async function createSale(raw: SaleInput) {
             )
           )
           .returning({ costPrice: products.costPrice, name: products.name })
-        if (!product) throw new ActionError("Not enough stock")
+        if (!product) throw new ActionError(ERRORS.notEnoughStock)
 
         if (item.variantId) {
           const [variant] = await tx
@@ -147,7 +154,7 @@ export async function createSale(raw: SaleInput) {
             )
             .returning({ id: productVariants.id })
           if (!variant)
-            throw new ActionError(`Not enough stock: ${product.name}`)
+            throw new ActionError(ERRORS.notEnoughStockOf(product.name))
         }
 
         await tx.insert(saleItems).values({
@@ -225,7 +232,7 @@ export async function getSales(shopId: ID, day: string) {
         .filter((i) => i.saleId === r.sale.id)
         .map((i) => ({
           productName: i.productName,
-          variant: [i.size, i.color].filter(Boolean).join(" · ") || null,
+          variant: variantLabel(i) || null,
           unit: i.unit,
           qty: i.qty,
           price: i.price,

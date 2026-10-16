@@ -7,7 +7,10 @@ import { and, desc, eq, isNull, sql } from "drizzle-orm"
 import { db, type Tx } from "@/db"
 import { products, productVariants, purchases, suppliers } from "@/db/schema"
 import { ActionError, parse, run } from "@/lib/action"
+import { ERRORS } from "@/lib/errors"
+import { roundMoney } from "@/lib/calc"
 import { requireOwner, requireShop } from "@/lib/session"
+import { variantLabel } from "@/lib/utils"
 import type { ID, PurchaseInput, PurchaseRow } from "@/types"
 import { idSchema, purchaseSchema } from "@/types/validations"
 
@@ -66,9 +69,9 @@ export async function createPurchase(input: PurchaseInput) {
             eq(products.shopId, input.shopId)
           )
         )
-      if (!product) throw new ActionError("Product not found")
+      if (!product) throw new ActionError(ERRORS.productNotFound)
       if (product.hasVariants && !input.variantId)
-        throw new ActionError("Pick a variant")
+        throw new ActionError(ERRORS.pickVariant)
 
       const [supplier] = await tx
         .select({ id: suppliers.id })
@@ -79,12 +82,16 @@ export async function createPurchase(input: PurchaseInput) {
             eq(suppliers.shopId, input.shopId)
           )
         )
-      if (!supplier) throw new ActionError("Pick a supplier")
+      if (!supplier) throw new ActionError(ERRORS.pickSupplier)
 
       const cost =
         isOwner && input.cost !== null && input.cost >= 0
           ? input.cost
           : await lastCost(tx, product.id, input.variantId)
+
+      if (paid > roundMoney(input.qty * cost)) {
+        throw new ActionError(ERRORS.paidMoreThanTotal)
+      }
 
       const [row] = await tx
         .insert(purchases)
@@ -110,7 +117,7 @@ export async function createPurchase(input: PurchaseInput) {
             )
           )
           .returning({ id: productVariants.id })
-        if (!v) throw new ActionError("Variant not found")
+        if (!v) throw new ActionError(ERRORS.variantNotFound)
         await tx
           .update(products)
           .set({ costPrice: cost })
@@ -128,7 +135,7 @@ export async function createPurchase(input: PurchaseInput) {
       await tx
         .update(suppliers)
         .set({
-          payableBalance: sql`${suppliers.payableBalance} + ${input.qty * cost - paid}`,
+          payableBalance: sql`${suppliers.payableBalance} + ${roundMoney(input.qty * cost - paid)}`,
         })
         .where(eq(suppliers.id, input.supplierId))
 
@@ -164,7 +171,7 @@ export async function getPurchases(shopId: ID) {
       paid: isOwner ? r.purchase.paid : 0,
       productName: r.productName,
       unit: r.unit,
-      variant: [r.size, r.color].filter(Boolean).join(" · ") || null,
+      variant: variantLabel(r) || null,
       supplierName: r.supplierName,
     }))
   })

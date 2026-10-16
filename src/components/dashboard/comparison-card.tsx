@@ -3,6 +3,7 @@ import { ArrowDownRight, ArrowUpRight, Minus } from "lucide-react"
 
 import { Money } from "@/components/shared/money"
 import { StatCard } from "@/components/shared/stat-card"
+import { SHOP_TZ } from "@/lib/config"
 import { cn } from "@/lib/utils"
 
 interface ComparisonCardProps {
@@ -17,7 +18,7 @@ export function ComparisonCard({ today, lastWeek }: ComparisonCardProps) {
   const Icon =
     pct === null || pct === 0 ? Minus : pct > 0 ? ArrowUpRight : ArrowDownRight
   const weekday = new Date().toLocaleDateString("en-GB", {
-    timeZone: "Asia/Dhaka",
+    timeZone: SHOP_TZ,
     weekday: "long",
   })
 

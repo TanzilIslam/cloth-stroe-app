@@ -13,8 +13,9 @@ import {
   saleItems,
   sales,
 } from "@/db/schema"
-import { daysAgo, local, todayStart } from "@/db/time"
+import { daysAgo, local, sum, todayStart, TZ } from "@/db/sql"
 import { ActionError, parse, run } from "@/lib/action"
+import { ERRORS } from "@/lib/errors"
 import { calcReorderQty, daysSince } from "@/lib/calc"
 import { requireOwner, requireShop, requireUser } from "@/lib/session"
 import type {
@@ -34,8 +35,6 @@ import {
   shopIdsSchema,
 } from "@/types/validations"
 
-const sum = (expr: unknown) =>
-  sql<number>`coalesce(sum(${expr}), 0)`.mapWith(Number)
 const netSale = sql`${sales.total} - ${sales.discount}`
 const itemProfit = sql`(${saleItems.price} - ${saleItems.costSnapshot}) * ${saleItems.qty}`
 
@@ -44,7 +43,7 @@ async function allowShops(shopIds: ID[]) {
   const user = await requireUser()
   shopIds = parse(shopIdsSchema, shopIds)
   if (user.role !== "owner" && shopIds.some((id) => id !== user.shopId)) {
-    throw new ActionError("Not your shop")
+    throw new ActionError(ERRORS.notYourShop)
   }
   return user
 }
@@ -199,7 +198,7 @@ export async function getMonthlyReport(shopIds: ID[], months = 6) {
     await requireOwner()
     shopIds = parse(shopIdsSchema, shopIds)
     months = parse(monthsSchema, months)
-    const from = sql`(date_trunc('month', now() AT TIME ZONE 'Asia/Dhaka') - make_interval(months => ${months - 1})) AT TIME ZONE 'Asia/Dhaka'`
+    const from = sql`(date_trunc('month', now() AT TIME ZONE ${TZ}) - make_interval(months => ${months - 1})) AT TIME ZONE ${TZ}`
     const month = (col: unknown) =>
       sql<string>`to_char(${local(col)}, 'YYYY-MM')`
     const [s, i, e] = await Promise.all([

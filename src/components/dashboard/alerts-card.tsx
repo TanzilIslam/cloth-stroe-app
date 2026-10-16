@@ -6,6 +6,7 @@ import { Money } from "@/components/shared/money"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { daysSince } from "@/lib/calc"
 import type { DueRow, LowStockRow } from "@/types"
+import { variantLabel } from "@/lib/utils"
 
 interface AlertsCardProps {
   lowStock: LowStockRow[]
@@ -39,8 +40,7 @@ export function AlertsCard({ lowStock, dues }: AlertsCardProps) {
                 >
                   <span className="truncate">
                     {r.product.name}
-                    {r.variant &&
-                      ` · ${[r.variant.size, r.variant.color].filter(Boolean).join(" ")}`}
+                    {r.variant && ` · ${variantLabel(r.variant)}`}
                   </span>
                   <span className="text-destructive">
                     {r.stock} {r.product.unit}
