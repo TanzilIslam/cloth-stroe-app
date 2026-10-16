@@ -7,6 +7,8 @@ This file tracks **later improvements** found in a review. Nothing here is broke
 
 Suggested order: 1 → 2 → 3 → 6, then 4 and 5 when the data grows.
 
+**Progress:** 8 / 27 done (quick wins on 2026-10-16). Next up: clean production seed (needed for go-live), action helper, error codes.
+
 ---
 
 ## 1. Reusable building blocks
@@ -14,17 +16,17 @@ Suggested order: 1 → 2 → 3 → 6, then 4 and 5 when the data grows.
 - [ ] **Action helper:** every action repeats `run()` → access check → `parse(schema)`. Add a helper such as
   `action({ access: "owner" | "shop" | "user", schema }, async (input, user) => …)`
   so each action is one line of setup and can't forget a check.
-- [x] **One cookie name:** `proxy.ts` and `src/lib/session.ts` each define `shop_session` ("keep in sync" comment). Move it to a tiny shared module both import.
+- [x] **One cookie name:** `SESSION_COOKIE` in `src/lib/config.ts`, imported by `proxy.ts` and `src/lib/session.ts`.
 - [x] **Variant label helper:** `[size, color].filter(Boolean).join(" · ")` is built in `sales.ts`, `purchases.ts` and several components. Add `variantLabel()` in `src/lib/utils.ts`.
-- [x] **SQL helpers in one file:** `sum()` / `total()` are copied in `cash.ts` and `reports.ts`. Move them to `src/db/sql.ts` with `todayStart`, `daysAgo` and `local`.
+- [x] **SQL helpers in one file:** `src/db/time.ts` became `src/db/sql.ts` with `sum()`, `todayStart`, `daysAgo`, `dayStart`, `local` and `TZ`.
 - [ ] **One "staff view":** hiding cost and profit from staff is done separately in `forUser`, `getPurchases` and `getDashboard`. Make one place that decides what staff may see, so a new action can't leak cost by mistake.
 
 **Outcome:** shared rules and wording live in one place; new actions are shorter and safer by default.
 
 ## 2. Data safety in the database
-- [x] **CHECK constraints** (migration): `stock_qty >= 0` on products and variants, `due_balance >= 0`, `payable_balance >= 0`, `sale_items.qty <> 0`, `purchases.qty > 0`, `amount > 0` on expenses and payments. The app already checks; the database becomes the last guard.
+- [x] **CHECK constraints** (migration `0003_check_constraints`, 11 rules): stock ≥ 0 on products and variants, prices ≥ 0, due / payable balances ≥ 0, `sale_items.qty <> 0`, sale price ≥ 0, `purchases.qty > 0`, purchase cost / paid ≥ 0, `amount > 0` on expenses and payments. Stock in also rejects "paid" above the total. **Run `pnpm db:migrate` on each database.**
 - [ ] **Unique rules per shop:** product `barcode` (when not null) and customer `phone` (when not empty), so two products can't share one barcode.
-- [x] **Money rounding:** totals are computed in JavaScript with decimals (e.g. 2.5 × 325). Round every money value to 2 decimals on the server before saving (`roundMoney()` in `src/lib/calc.ts`), and test it.
+- [x] **Money rounding:** `roundMoney()` in `src/lib/calc.ts`; sale total / net / paid / due, supplier balance change and cash difference are rounded to 2 decimals. (Unit test still to add.)
 - [ ] **Soft delete for expenses:** add `deleted_at` instead of deleting the row; reports ignore deleted rows. Nothing money-related disappears for good.
 - [ ] **Audit log** (`audit_log` table: who, when, action, before / after JSON): price changes, product deactivation, expense delete, payment, user changes, unlock. Owner can view it on `/setup`.
 - [ ] **Payments link:** `payments.party_id` points to either a customer or a supplier with no foreign key. Split into `customer_id` / `supplier_id` (one of them set), each with a real foreign key.
@@ -34,7 +36,7 @@ Suggested order: 1 → 2 → 3 → 6, then 4 and 5 when the data grows.
 ## 3. Errors and API shape
 - [ ] **Error codes:** `Result` errors carry only a message. Add a code, e.g. `{ ok: false, code: "UNAUTHORIZED" | "FORBIDDEN" | "VALIDATION" | "CONFLICT", error }`. The client then sends an expired session straight to `/login` instead of showing a message.
 - [ ] **Error tracking:** unexpected errors only reach Vercel logs. Add Sentry (or similar) for server and client errors, without sending PINs or session data.
-- [x] **Validate env at startup** (`src/lib/env.ts` with Zod): fail fast with a clear message when `DATABASE_URL` or `SESSION_SECRET` is missing or too short.
+- [x] **Validate env at startup:** `src/lib/env.ts` (Zod) checked once in `src/instrumentation.ts` when the server starts; the session secret is read through it.
 
 **Outcome:** failures are handled the same way everywhere, and problems in production are visible.
 
@@ -49,7 +51,7 @@ Suggested order: 1 → 2 → 3 → 6, then 4 and 5 when the data grows.
 **Outcome:** pages stay fast with years of sales and many users.
 
 ## 5. Time zone
-- [x] **One time zone constant** (`SHOP_TZ = "Asia/Dhaka"`) used by `src/db/time.ts` SQL (instead of the literal string in each snippet) and by the UI helpers.
+- [x] **One time zone constant:** `SHOP_TZ` in `src/lib/config.ts`, used by the SQL in `src/db/sql.ts` (as `TZ`) and by the UI date helpers.
 - [ ] **Seed data in shop time:** `src/db/seed-data.ts` sets hours with the server's local clock. Generate them in Dhaka time so demo peak hours look right on any server.
 
 **Outcome:** changing the shop's time zone is a one-line change.

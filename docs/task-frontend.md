@@ -112,6 +112,8 @@ When the backend is ready, mock calls are swapped for Server Actions without cha
 ## Improvements (later)
 Found in a review after the backend was done. Nothing is broken; these make the code more consistent and the UI safer. Suggested order: 1 → 5.
 
+**Progress:** 15 / 24 done (quick wins on 2026-10-16). Left: form `Field`, client Zod, forms on `useAction`, pay-dialog loader, per-query errors, 3 money confirms.
+
 ### 1. Reusable building blocks
 - [x] **`ROUTES` constant** (`src/lib/routes.ts`): one place for `"/"`, `"/login"`, `"/sell"`, `"/sell/history"`, `"/stock"`, `"/hisab"`, `"/setup"`. Use it in nav items, redirects, links, `proxy.ts` and `OWNER_ONLY`.
 - [x] **Shop time zone constant:** `"Asia/Dhaka"` is written in `src/lib/utils.ts`, `src/db/time.ts` and `comparison-card.tsx`. Export one `SHOP_TZ` and use it everywhere (SQL included).
@@ -129,8 +131,8 @@ Found in a review after the backend was done. Nothing is broken; these make the 
 
 ### 3. `useAction` hook: pending + toast in one place
 Done so far: the hook and every one-click action. Forms still use their own pending / error state.
-- [x] **Hook** (`src/hooks/use-action.ts`): wraps any `src/api` call and returns `{ run, pending }`. On success it shows an optional success toast; on error it shows the error message as a toast (or returns it for inline display).
-- [ ] **Use it for every mutation**, replacing the hand-written `pending` / `error` / `try-catch` in each form and page.
+- [x] **Hook** (`src/hooks/use-action.ts`): wraps any `src/api` call and returns `{ run, pending }`. On success it shows an optional success toast and calls `onDone`; on error it shows the message as a toast and `run` resolves `undefined`.
+- [ ] **Use it for every form**, replacing the hand-written `pending` / `error` / `try-catch` in the product, stock in, party, user, payment, expense, cash count and pay forms. Keep inline error text where the form shows it today.
 - [x] **Fix one-click actions with no pending state or error handling:** deactivate / activate product, delete expense, add / delete variant, deactivate user, unlock device, shop switch. Today a failure there is silent, and a double tap can fire twice.
 - [x] **Add missing feedback toasts:** shop switch ("Now in Women's Shop"), variant added / deleted, expense deleted, product activated / deactivated.
 
@@ -144,17 +146,15 @@ Done so far: the hook and every one-click action. Forms still use their own pend
 **Outcome:** no blank areas; the user always sees loading, data, empty or error.
 
 ### 5. `ConfirmDialog` for delete and important actions
-Done so far: `useConfirm()` on delete expense, delete variant, deactivate product, deactivate user, unlock device.
-- [x] **Component** (`components/shared/confirm-dialog.tsx`): title, message, confirm label, red "danger" style for destructive actions, pending state while the action runs. Easy to call, e.g. `confirm({ title, message, danger: true })` returning a promise, or a `<ConfirmDialog>` wrapper around the trigger button.
-- [ ] **Use it on:**
-  - delete expense
-  - delete variant
-  - deactivate product
-  - deactivate user
-  - unlock device
-  - save cash count when there's a difference ("Cash is short ৳X. Save anyway?")
-  - refund in return mode
-  - receive / pay a payment of more than ৳10,000
-- [ ] Use the danger style (red confirm button) for the deletes and deactivations.
+- [x] **Hook + dialog** (`components/shared/confirm-dialog.tsx`): `const [confirm, confirmDialog] = useConfirm()`, then `if (await confirm({ title, message, confirmLabel, danger }))`. Render `{confirmDialog}` once. The trigger button shows the pending state (via `useAction`).
+- [x] Delete expense (expense sheet + Hisab)
+- [x] Delete variant
+- [x] Deactivate product (activating needs no confirm)
+- [x] Deactivate user (activating needs no confirm)
+- [x] Unlock device
+- [x] Danger style (red confirm button) on deletes and deactivations
+- [ ] Save cash count when there's a difference ("Cash is short ৳X. Save anyway?")
+- [ ] Refund in return mode ("Refund ৳X?")
+- [ ] Receive / pay a payment of more than ৳10,000
 
 **Outcome:** no destructive or money-moving action happens from a single accidental tap.
