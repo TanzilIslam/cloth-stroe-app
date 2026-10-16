@@ -18,3 +18,22 @@ Next.js app for the men's and women's shops: sales, stock and hisab.
 | `pnpm lint` | ESLint |
 | `pnpm format` | Prettier write |
 | `pnpm build` | Production build |
+| `pnpm db:generate` | Create a SQL migration from `src/db/schema.ts` |
+| `pnpm db:migrate` | Apply migrations to `DATABASE_URL` |
+| `pnpm db:seed` | Wipe + load demo data (PINs: owner `1111`, staff `2222` / `3333`) |
+| `pnpm db:studio` | Browse the database |
+
+## Backend Setup (local PC)
+1. Create a Neon database and copy the **pooled** connection string (host has `-pooler`).
+2. `cp .env.example .env.local`, then fill in `DATABASE_URL` and `SESSION_SECRET` (`openssl rand -base64 32`).
+3. `pnpm install`
+4. `pnpm db:migrate` → `pnpm db:seed`
+5. `pnpm dev`, open http://localhost:3000 and log in with `1111`.
+
+**Vercel:** add the same two env vars in Project Settings → Environment Variables. Run `pnpm db:migrate` from your PC before deploying a schema change.
+
+## Known Issues (fix later)
+- No PIN attempt limit yet (4-digit PINs can be guessed).
+- Login checks the PIN against every user's hash (fine for a few users).
+- Session keeps role and shop until logout; a role change needs a re-login.
+- Zod schemas are not added yet; actions validate by hand.

@@ -23,20 +23,22 @@ import {
 } from "@/components/ui/sheet"
 import { useQuery } from "@/hooks/use-query"
 import { useSession } from "@/hooks/use-session"
+import { useShops } from "@/hooks/use-shops"
 import {
   createExpense,
   deleteExpense,
   getTodayExpenses,
   logout,
   switchShop,
-} from "@/mocks"
-import { shops } from "@/mocks/data" // static config: 2 shops
+} from "@/api"
+import { setSessionUser } from "@/lib/session-store"
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const user = useSession()
   const router = useRouter()
   const pathname = usePathname()
   const [expenseOpen, setExpenseOpen] = useState(false)
+  const shops = useShops()
   const shopId = user?.shopId
   const todayExpenses = useQuery(
     () =>
@@ -59,7 +61,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const shopIndex = shops.findIndex((s) => s.id === user.shopId)
   const shop = shops[shopIndex]
   const nextShop = shops[(shopIndex + 1) % shops.length]
-  const handleLogout = () => logout()
+  async function handleLogout() {
+    await logout()
+    setSessionUser(null)
+  }
+
+  async function handleShopChange(shopId: number) {
+    setSessionUser(await switchShop(shopId))
+  }
 
   async function saveExpense(values: ExpenseValues) {
     await createExpense({ shopId: user!.shopId, ...values })
@@ -72,7 +81,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <Sidebar
         user={user}
         shops={shops}
-        onShopChange={switchShop}
+        onShopChange={handleShopChange}
         onExpense={() => setExpenseOpen(true)}
         onLogout={handleLogout}
       />
@@ -84,7 +93,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <button
               type="button"
               className="-ml-2 min-h-11 px-2 text-sm font-medium"
-              onClick={() => switchShop(nextShop.id)}
+              onClick={() => nextShop && handleShopChange(nextShop.id)}
             >
               {shop?.name} ⇄
             </button>

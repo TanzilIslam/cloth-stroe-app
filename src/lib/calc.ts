@@ -1,4 +1,4 @@
-// Pure business math, shared by mocks and (later) Server Actions.
+// Pure business math, shared by Server Actions and the UI.
 
 const DAY = 24 * 60 * 60 * 1000
 
@@ -15,11 +15,4 @@ export function calcReorderQty(
 /** Whole days between a date and now. */
 export function daysSince(date: Date, now = new Date()) {
   return Math.floor((now.getTime() - date.getTime()) / DAY)
-}
-
-/** Start of today (local time). */
-export function startOfToday() {
-  const d = new Date()
-  d.setHours(0, 0, 0, 0)
-  return d
 }

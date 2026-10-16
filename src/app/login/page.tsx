@@ -7,7 +7,8 @@ import { useEffect } from "react"
 
 import { PinPad } from "@/components/shared/pin-pad"
 import { useSession } from "@/hooks/use-session"
-import { login } from "@/mocks"
+import { login } from "@/api"
+import { setSessionUser } from "@/lib/session-store"
 import type { Role } from "@/types"
 
 const HOME: Record<Role, string> = { owner: "/", staff: "/sell" }
@@ -22,6 +23,7 @@ export default function LoginPage() {
 
   async function handleSubmit(pin: string) {
     const loggedIn = await login(pin)
+    if (loggedIn) setSessionUser(loggedIn)
     return !!loggedIn
   }
 

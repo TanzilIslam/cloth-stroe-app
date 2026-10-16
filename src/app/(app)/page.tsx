@@ -21,14 +21,16 @@ import {
   getDues,
   getLowStock,
   getPeakTimes,
-} from "@/mocks"
-import { shops } from "@/mocks/data" // static config: 2 shops
+} from "@/api"
+import { useShops } from "@/hooks/use-shops"
 
 export default function DashboardPage() {
   const user = useSession()!
   const [both, setBoth] = useState(false)
+  const shops = useShops()
   const isOwner = user.role === "owner"
-  const shopIds = isOwner && both ? shops.map((s) => s.id) : [user.shopId]
+  const shopIds =
+    isOwner && both && shops.length ? shops.map((s) => s.id) : [user.shopId]
   const key = shopIds.join(",")
 
   const stats = useQuery(() => getDashboard(shopIds), [key])

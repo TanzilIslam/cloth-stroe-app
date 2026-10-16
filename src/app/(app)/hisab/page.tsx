@@ -36,8 +36,8 @@ import {
   getMonthlyReport,
   recordPayment,
   saveCashCount,
-} from "@/mocks"
-import { shops } from "@/mocks/data" // static config: 2 shops
+} from "@/api"
+import { useShops } from "@/hooks/use-shops"
 import { formatDate } from "@/lib/utils"
 import { EXPENSE_CATEGORIES, type DueRow } from "@/types"
 
@@ -49,6 +49,7 @@ const monthStart = () => {
 export default function HisabPage() {
   const user = useSession()!
   const shopId = user.shopId
+  const shops = useShops()
   const shopName = shops.find((s) => s.id === shopId)?.name ?? ""
 
   const dues = useQuery(() => getDues(shopId), [shopId])
@@ -152,11 +153,7 @@ export default function HisabPage() {
               key={counts.data?.length ?? 0}
               summary={cash.data}
               onSubmit={async (values) => {
-                const row = await saveCashCount({
-                  shopId,
-                  userId: user.id,
-                  ...values,
-                })
+                const row = await saveCashCount({ shopId, ...values })
                 toast[row.diff === 0 ? "success" : "warning"](
                   row.diff === 0
                     ? "Cash matched"

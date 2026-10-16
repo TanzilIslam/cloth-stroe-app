@@ -52,9 +52,10 @@ Staff do only **3 actions**: বিক্রি (sell), মাল তোলা (
 - **Laptop (lg, owner):** sidebar plus data tables, filters, editing, reports.
 
 ## Stack Notes
-- **Data layer:** Drizzle ORM + Neon serverless driver, Server Actions (no separate API).
-- **Auth:** PIN with an `iron-session` cookie.
-- **Stock updates:** stock_qty changes in the same DB transaction as the sale or purchase.
+- **Data layer:** Drizzle ORM + `pg` (node-postgres) on Neon's pooled connection, Server Actions (no separate API). `pg` also runs against a local Postgres for testing.
+- **Auth:** PIN (bcrypt hash) with an `iron-session` cookie. `src/proxy.ts` sends visitors without a cookie to `/login`; every action checks the session, role and shop.
+- **Stock updates:** stock_qty changes in the same DB transaction as the sale or purchase (atomic `stock >= qty` check).
+- **Time zone:** "today", hours and weekdays are computed in Asia/Dhaka (Vercel runs in UTC).
 - **Mobile install:** PWA, so staff can add it to their home screen.
 
 ## Build Order

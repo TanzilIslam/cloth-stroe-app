@@ -7,7 +7,7 @@ When the backend is ready, mock calls are swapped for Server Actions without cha
 
 **No-rewrite rules** (so the backend swap needs no UI changes):
 1. Types come from `docs/schema.md`.
-2. All data goes through one layer (`src/mocks/` now, `src/actions/` later), using the same function names as `docs/function.md`.
+2. All data goes through one layer (`src/api/`, which calls the Server Actions in `src/actions/`), using the same function names as `docs/function.md`.
 3. Components receive data and handlers through props and never fetch on their own.
 
 ---

@@ -1,7 +1,6 @@
 "use client"
 
-// Loads async data for a page container. Swap-friendly: works with mocks
-// now and Server Actions later.
+// Loads async data for a page container (calls src/api).
 import { useCallback, useEffect, useState } from "react"
 
 export function useQuery<T>(fn: () => Promise<T>, deps: unknown[]) {

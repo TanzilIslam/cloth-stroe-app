@@ -14,9 +14,10 @@ A high-level overview of the app structure. It is a **guide, not a strict rule**
 ## Structure
 ```
 src/
-├─ middleware.ts   Auth redirect + role guard
-├─ actions/        Server Actions, one file per domain
-├─ db/             Drizzle schema, Neon client, seed
+├─ proxy.ts        No session cookie → /login
+├─ actions/        Server Actions, one file per domain (return { ok, data | error })
+├─ api/            Client wrapper: same names, throws on error
+├─ db/             Drizzle schema, pg client, time helpers, seed
 ├─ lib/            Session, helpers, calculations
 ├─ types/          Shared types (schema.md) + Zod
 ├─ hooks/          Client state (cart, session, data loading)
@@ -29,10 +30,10 @@ src/
 |---|---|---|
 | Actions | `auth`, `sales`, `products`, `purchases`, `parties`, `expenses`, `cash`, `reports` | Read and write data for each domain |
 | DB | `schema`, `index`, `seed` | Tables, connection, sample data |
-| Lib | `session`, `utils`, `calc` | PIN session, formatting (Taka, dates, WhatsApp link), profit and reorder math |
+| Lib | `session`, `action`, `result`, `session-store`, `utils`, `calc` | PIN session, formatting (Taka, dates, WhatsApp link), profit and reorder math |
 | Types | `index`, `validations` | Interfaces and Zod schemas |
 | Hooks | `use-cart`, `use-session`, `use-query` | POS cart, current user, page data loading |
-| Config | `middleware`, `drizzle.config` | Route protection, migrations |
+| Config | `proxy`, `drizzle.config` | Route protection, migrations |
 
 ## Frontend (`.tsx`)
 | Page | Purpose | Component group |

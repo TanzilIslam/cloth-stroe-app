@@ -39,7 +39,7 @@ import {
   saveVariant,
   toggleProductActive,
   updateProduct,
-} from "@/mocks"
+} from "@/api"
 import type { ID, ProductInput } from "@/types"
 
 type StockInTarget = { productId: ID; variantId: ID | null; qty?: number }

@@ -1,4 +1,4 @@
-// In-memory mock tables. Resets on page reload. Replaced by Neon later.
+// Demo data for the seed: 2 shops, 3 users, products, 70 days of history.
 import type {
   CashCount,
   Customer,

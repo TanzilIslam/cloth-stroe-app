@@ -29,7 +29,7 @@ import {
   getRecentProducts,
   saveParty,
   searchProducts,
-} from "@/mocks"
+} from "@/api"
 import { cn, formatTaka } from "@/lib/utils"
 import type { ProductWithVariants } from "@/types"
 
