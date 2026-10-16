@@ -7,6 +7,7 @@ import {
   createProduct,
   deleteVariant,
   getProducts,
+  saveVariant,
   updateProduct,
 } from "@/actions/products"
 import { getComparison } from "@/actions/reports"
@@ -71,10 +72,25 @@ describe("products", () => {
 
   it("a new variant can start with opening stock", async () => {
     await loginAs(PIN.owner)
-    const v = ok(await saveVariant({ productId: 8, size: "XL", color: "Green", openingStock: 6 }))
+    const v = ok(
+      await saveVariant({
+        productId: 8,
+        size: "XL",
+        color: "Green",
+        openingStock: 6,
+      })
+    )
     expect(v.stockQty).toBe(6)
     // editing a variant never changes its stock
-    const edited = ok(await saveVariant({ id: v.id, productId: 8, size: "XL", color: "Dark Green", openingStock: 99 }))
+    const edited = ok(
+      await saveVariant({
+        id: v.id,
+        productId: 8,
+        size: "XL",
+        color: "Dark Green",
+        openingStock: 99,
+      })
+    )
     expect(edited.stockQty).toBe(6)
   })
 
