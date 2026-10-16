@@ -56,6 +56,7 @@ export const users = pgTable("users", {
   pinHash: text().notNull(),
   role: role().notNull(),
   shopId: shopId(),
+  active: boolean().notNull().default(true),
 })
 
 export const products = pgTable(

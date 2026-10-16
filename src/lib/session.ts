@@ -4,7 +4,11 @@ import "server-only"
 
 import bcrypt from "bcryptjs"
 import { sealData, unsealData } from "iron-session"
+import { eq } from "drizzle-orm"
 import { cookies } from "next/headers"
+
+import { db } from "@/db"
+import { users } from "@/db/schema"
 
 import type { ID, SessionUser } from "@/types"
 
@@ -49,8 +53,34 @@ export async function clearSession() {
   ;(await cookies()).delete(COOKIE)
 }
 
+/**
+ * Session user re-checked against the database on every call, so a
+ * deactivated user is logged out and role / name changes apply at once.
+ * The owner keeps the shop they switched to; staff always get their own shop.
+ */
+export async function currentUser(): Promise<SessionUser | null> {
+  const session = await getSession()
+  if (!session) return null
+  const [u] = await db
+    .select({
+      name: users.name,
+      role: users.role,
+      shopId: users.shopId,
+      active: users.active,
+    })
+    .from(users)
+    .where(eq(users.id, session.id))
+  if (!u?.active) return null
+  return {
+    id: session.id,
+    name: u.name,
+    role: u.role,
+    shopId: u.role === "owner" ? session.shopId : u.shopId,
+  }
+}
+
 export async function requireUser(): Promise<SessionUser> {
-  const user = await getSession()
+  const user = await currentUser()
   if (!user) throw new ActionError("Please log in again")
   return user
 }

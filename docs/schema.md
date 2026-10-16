@@ -42,6 +42,7 @@ export interface User {
   pinHash: string; // backend only
   role: Role;
   shopId: ID;
+  active: boolean; // inactive users can't log in
 }
 
 export interface Product {

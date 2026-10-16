@@ -28,7 +28,7 @@ src/
 ## Backend (`.ts`)
 | Area | Files | Responsibility |
 |---|---|---|
-| Actions | `auth`, `sales`, `products`, `purchases`, `parties`, `expenses`, `cash`, `reports` | Read and write data for each domain |
+| Actions | `auth`, `users`, `sales`, `products`, `purchases`, `parties`, `expenses`, `cash`, `reports` | Read and write data for each domain |
 | DB | `schema`, `index`, `seed` | Tables, connection, sample data |
 | Lib | `session`, `action`, `result`, `session-store`, `utils`, `calc` | PIN session, formatting (Taka, dates, WhatsApp link), profit and reorder math |
 | Types | `index`, `validations` | Interfaces and Zod schemas |
@@ -43,6 +43,7 @@ src/
 | `/sell` | POS | `sell` |
 | `/stock` | Products, stock in, alerts | `stock` |
 | `/hisab` | Dues, expenses, cash, reports | `hisab` |
+| `/setup` | Owner: staff accounts, customers, suppliers | `setup` |
 | Layouts | Root + app shell (bottom nav / sidebar) | `layout` |
 
 Shared UI (Numpad, StatCard, DataTable, Money) lives in `components/shared/`. shadcn files in `components/ui/` are not tracked here.

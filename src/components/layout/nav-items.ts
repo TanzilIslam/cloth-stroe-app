@@ -3,6 +3,7 @@ import {
   BookOpen,
   LayoutDashboard,
   Package,
+  Settings,
   ShoppingCart,
   type LucideIcon,
 } from "lucide-react"
@@ -20,15 +21,16 @@ const all = {
   sell: { href: "/sell", label: "Sell", icon: ShoppingCart },
   stock: { href: "/stock", label: "Stock", icon: Package },
   hisab: { href: "/hisab", label: "Hisab", icon: BookOpen },
+  setup: { href: "/setup", label: "Setup", icon: Settings },
 } satisfies Record<string, NavItem>
 
 export const NAV_ITEMS: Record<Role, NavItem[]> = {
-  owner: [all.dashboard, all.sell, all.stock, all.hisab],
+  owner: [all.dashboard, all.sell, all.stock, all.hisab, all.setup],
   staff: [all.sell, all.stock],
 }
 
 /** Routes staff cannot open. */
-export const OWNER_ONLY = ["/hisab"]
+export const OWNER_ONLY = ["/hisab", "/setup"]
 
 export function isActive(pathname: string, href: string) {
   return href === "/" ? pathname === "/" : pathname.startsWith(href)

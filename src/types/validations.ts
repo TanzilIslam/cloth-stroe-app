@@ -5,6 +5,7 @@ import { z } from "zod"
 import {
   EXPENSE_CATEGORIES,
   PARTY_TYPES,
+  ROLES,
   UNITS,
   type ExpenseInput,
   type PartyInput,
@@ -12,6 +13,7 @@ import {
   type ProductInput,
   type PurchaseInput,
   type SaleInput,
+  type UserInput,
   type VariantInput,
 } from "."
 
@@ -148,3 +150,12 @@ export const cashCountSchema = z.object({
   expected: amount,
   counted: nonNegative("Counted cash"),
 })
+
+// --- users (owner, /setup) ---
+
+export const userSchema = z.object({
+  name: requiredText("Name", 60),
+  role: z.enum(ROLES, "Pick a role"),
+  shopId: idSchema,
+  pin: pinSchema.nullable(),
+}) satisfies z.ZodType<UserInput>

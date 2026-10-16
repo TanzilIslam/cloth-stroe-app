@@ -8,6 +8,7 @@ import * as products from "@/actions/products"
 import * as purchases from "@/actions/purchases"
 import * as reports from "@/actions/reports"
 import * as sales from "@/actions/sales"
+import * as users from "@/actions/users"
 import { check, unwrap } from "@/lib/result"
 import type { Customer, ID, PartyInput, Supplier } from "@/types"
 
@@ -62,6 +63,7 @@ export async function saveParty(
     ? check(await parties.saveParty("customer", input))
     : check(await parties.saveParty("supplier", input))
 }
+export const updateParty = unwrap(parties.updateParty)
 export const getDues = unwrap(parties.getDues)
 export const recordPayment = unwrap(parties.recordPayment)
 
@@ -84,3 +86,9 @@ export const getPeakTimes = unwrap(reports.getPeakTimes)
 export const getMonthlyReport = unwrap(reports.getMonthlyReport)
 export const getLowStock = unwrap(reports.getLowStock)
 export const getDeadStock = unwrap(reports.getDeadStock)
+
+// users (owner, /setup)
+export const getUsers = unwrap(users.getUsers)
+export const createUser = unwrap(users.createUser)
+export const updateUser = unwrap(users.updateUser)
+export const setUserActive = unwrap(users.setUserActive)

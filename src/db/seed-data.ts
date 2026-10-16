@@ -21,9 +21,30 @@ export const shops: Shop[] = [
 
 // Mock only: pinHash holds the plain PIN. Owner: 1111, Staff: 2222 / 3333
 export const users: User[] = [
-  { id: 1, name: "Owner", pinHash: "1111", role: "owner", shopId: 1 },
-  { id: 2, name: "Rahim", pinHash: "2222", role: "staff", shopId: 1 },
-  { id: 3, name: "Karima", pinHash: "3333", role: "staff", shopId: 2 },
+  {
+    id: 1,
+    name: "Owner",
+    pinHash: "1111",
+    role: "owner",
+    shopId: 1,
+    active: true,
+  },
+  {
+    id: 2,
+    name: "Rahim",
+    pinHash: "2222",
+    role: "staff",
+    shopId: 1,
+    active: true,
+  },
+  {
+    id: 3,
+    name: "Karima",
+    pinHash: "3333",
+    role: "staff",
+    shopId: 2,
+    active: true,
+  },
 ]
 
 const product = (

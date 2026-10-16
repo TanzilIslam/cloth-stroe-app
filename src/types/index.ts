@@ -35,6 +35,7 @@ export interface User {
   pinHash: string // backend only
   role: Role
   shopId: ID
+  active: boolean // inactive users can't log in
 }
 
 export interface Product {
@@ -144,7 +145,7 @@ export interface CashCount {
 // Frontend-only shapes
 
 /** Logged-in user, never includes pinHash. */
-export type SessionUser = Omit<User, "pinHash">
+export type SessionUser = Omit<User, "pinHash" | "active">
 
 export interface ProductWithVariants extends Product {
   variants: ProductVariant[]
@@ -264,4 +265,14 @@ export interface MonthRow {
   gross: Money
   expenses: Money
   net: Money
+}
+
+/** User as the owner sees it on /setup (never the PIN hash). */
+export type UserRow = Omit<User, "pinHash">
+
+export interface UserInput {
+  name: string
+  role: Role
+  shopId: ID
+  pin: string | null // null on edit = keep the current PIN
 }

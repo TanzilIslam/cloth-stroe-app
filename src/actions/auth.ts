@@ -8,7 +8,7 @@ import { shops, users } from "@/db/schema"
 import { ActionError, parse, run } from "@/lib/action"
 import {
   clearSession,
-  getSession,
+  currentUser,
   requireOwner,
   requireUser,
   setSession,
@@ -22,7 +22,7 @@ export async function login(pin: string) {
   return run(async (): Promise<SessionUser | null> => {
     if (!pinSchema.safeParse(pin).success) return null
     // PIN is the only identifier, so check it against every user (few rows)
-    const all = await db.select().from(users)
+    const all = await db.select().from(users).where(eq(users.active, true))
     for (const u of all) {
       if (await verifyPin(pin, u.pinHash)) {
         const user: SessionUser = {
@@ -47,7 +47,7 @@ export async function logout() {
 
 /** Current user from the session cookie, or null. */
 export async function getMe() {
-  return run(getSession)
+  return run(currentUser)
 }
 
 export async function getShops() {

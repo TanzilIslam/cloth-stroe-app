@@ -69,6 +69,24 @@ export async function saveParty(type: PartyType, input: PartyInput) {
   })
 }
 
+/** Edit name / phone. Balances only change through sales, stock in and payments. */
+export async function updateParty(type: PartyType, id: ID, input: PartyInput) {
+  return run(async () => {
+    type = parse(partyTypeSchema, type)
+    id = parse(idSchema, id)
+    input = parse(partySchema, input)
+    await requireShop(input.shopId)
+    const table = type === "customer" ? customers : suppliers
+    const [row] = await db
+      .update(table)
+      .set({ name: input.name, phone: input.phone })
+      .where(and(eq(table.id, id), eq(table.shopId, input.shopId)))
+      .returning()
+    if (!row) throw new ActionError("Not found")
+    return row
+  })
+}
+
 /** Customers who owe us and suppliers we owe, oldest unpaid first. */
 export async function getDues(shopId: ID) {
   return run(async (): Promise<DueRow[]> => {
