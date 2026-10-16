@@ -3,9 +3,9 @@
 Next.js app for the men's and women's shops: sales, stock and hisab.
 
 ## Docs
-- [about.md](docs/about.md): app plan
+- [about.md](docs/about.md): app plan, pages, tables, decisions
 - [schema.md](docs/schema.md): enums, types, interfaces
-- [function.md](docs/function.md): function blueprint
+- [function.md](docs/function.md): structure + all Server Actions
 - [task-frontend.md](docs/task-frontend.md): frontend task plan
 - [standup.md](docs/standup.md): daily progress log
 
@@ -27,7 +27,7 @@ Next.js app for the men's and women's shops: sales, stock and hisab.
 1. Create a Neon database and copy the **pooled** connection string (host has `-pooler`).
 2. `cp .env.example .env.local`, then fill in `DATABASE_URL` and `SESSION_SECRET` (`openssl rand -base64 32`).
 3. `pnpm install`
-4. `pnpm db:migrate` → `pnpm db:seed`
+4. `pnpm db:migrate` → `pnpm db:seed` (demo data; skip the seed for a real shop once a clean seed exists)
 5. `pnpm dev`, open http://localhost:3000 and log in with `1111`.
 
 **Vercel:** add the same two env vars in Project Settings → Environment Variables. Run `pnpm db:migrate` from your PC before deploying a schema change.

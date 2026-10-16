@@ -98,4 +98,11 @@ When the backend is ready, mock calls are swapped for Server Actions without cha
 ---
 
 ## Backend Hand-off
-Mock function names should match `docs/function.md` (e.g. `createSale`, `getProducts`) so the swap is a one-line import change.
+✅ Done: pages import from `@/api` (Server Actions) instead of the mocks, with no UI changes. The demo data now lives in `src/db/seed-data.ts`.
+
+## Added After the Plan
+- [x] `/setup` (owner): staff accounts, customers, suppliers, locked devices
+- [x] `/sell/history`: sales by day with details
+- [x] Stock → History tab (stock-in history; cost hidden from staff)
+- [x] Expense sheet → Count cash tab (staff cash count)
+- [x] Mock layer replaced by real Server Actions (`src/api/`)

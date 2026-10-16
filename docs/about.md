@@ -6,28 +6,33 @@
 ## Core Idea
 Staff do only **3 actions**: বিক্রি (sell), মাল তোলা (stock in), খরচ (expense). The system calculates everything else.
 
-## Pages (5)
+## Pages (7)
 | Route | Purpose | Who |
 |---|---|---|
 | `/login` | 4-digit PIN, auto-select shop | All |
-| `/` | Dashboard: today's sale, profit, cash, dues, alerts | Owner (staff see a limited view) |
-| `/sell` | POS: search → qty → pay | Staff |
-| `/stock` | Products, stock in, low/dead stock | Both |
-| `/hisab` | Dues (customer/supplier), expenses, monthly report | Owner |
+| `/` | Dashboard: today's sale, profit, cash, dues, alerts | Owner (staff see today's sale only) |
+| `/sell` | POS: search → qty → pay, return mode | Both |
+| `/sell/history` | Sales by day, sale details (view only) | Both |
+| `/stock` | Products, stock in, low/dead stock, stock-in history | Both |
+| `/hisab` | Dues (customer/supplier), expenses, cash count, monthly report | Owner |
+| `/setup` | Staff accounts, customers, suppliers, locked devices | Owner |
 
-## Tables (12)
+The **Expense** button (bottom nav / sidebar) opens a sheet with two tabs: add expense and count cash.
+
+## Tables (13)
 1. `shops`: id, name, type (men/women)
-2. `users`: id, name, pin_hash, role (owner/staff), shop_id
+2. `users`: id, name, pin_hash, role (owner/staff), shop_id, active (inactive users can't log in)
 3. `products`: id, shop_id, name, brand, category, unit (piece/yard/meter), cost_price, sell_price, stock_qty, low_stock_at, barcode, has_variants, active
 4. `product_variants`: id, product_id, size, color, stock_qty, barcode (ready-made dresses; stock is tracked per variant when `has_variants`)
 5. `customers`: id, shop_id, name, phone, due_balance
 6. `suppliers`: id, shop_id, name, phone, payable_balance
 7. `sales`: id, shop_id, user_id, customer_id, total, discount, paid, due, method (cash/bKash/due), created_at
-8. `sale_items`: sale_id, product_id, variant_id (nullable), qty, price, cost_snapshot (keeps profit accurate; a negative qty is a return)
+8. `sale_items`: id, sale_id, product_id, variant_id (nullable), qty, price, cost_snapshot (keeps profit accurate; a negative qty is a return)
 9. `purchases`: id, shop_id, supplier_id, product_id, variant_id (nullable), qty, cost, paid, created_at
 10. `expenses`: id, shop_id, category (rent/salary/bill/tailor/other), amount, note, date
 11. `payments`: id, shop_id, party_type (customer/supplier), party_id, amount, method, date
 12. `cash_counts`: id, shop_id, user_id, expected, counted, diff, date
+13. `login_attempts`: ip, failures, first_at, locked_until (PIN attempt limit per device)
 
 ## Auto Outputs (no extra input needed)
 - **Profit:** real profit per day, month, and shop.
@@ -43,6 +48,7 @@ Staff do only **3 actions**: বিক্রি (sell), মাল তোলা (
 - **Sell in 3 taps:** favorite/recent product tiles → qty chips (1 / 2 / 2.5 / 3 yard) → pay button.
 - **Stock in:** pick product → qty → cost (pre-filled from last time).
 - **Expense:** category icon → amount.
+- **Cash count:** opening cash + today's cash flows = expected; enter counted cash.
 - **Language:** English for now (Bangla later), big buttons, numpad entry.
 - **Hidden from staff:** cost price and profit.
 
@@ -56,15 +62,20 @@ Staff do only **3 actions**: বিক্রি (sell), মাল তোলা (
 - **Auth:** PIN (bcrypt hash) with an `iron-session` cookie. `src/proxy.ts` sends visitors without a cookie to `/login`; every action checks the session, role and shop.
 - **Stock updates:** stock_qty changes in the same DB transaction as the sale or purchase (atomic `stock >= qty` check).
 - **Time zone:** "today", hours and weekdays are computed in Asia/Dhaka (Vercel runs in UTC).
+- **Validation:** every Server Action parses its input with Zod (`src/types/validations.ts`).
+- **Session check:** every action re-reads the user from the database, so deactivation and role changes apply at once.
+- **Login limit:** 5 wrong PINs in 15 min lock that device (IP) for 15 min; the owner can unlock on `/setup`.
 - **Mobile install:** PWA, so staff can add it to their home screen.
 
 ## Build Order
-1. Schema + seed
-2. Login
-3. `/sell`
-4. `/stock`
-5. `/` dashboard
-6. `/hisab`
+1. ✅ Frontend with mock data (all pages, polish, PWA)
+2. ✅ Schema + migrations + seed
+3. ✅ PIN login, session, role and shop guards
+4. ✅ Server Actions for every page (frontend switched off mocks)
+5. ✅ Zod validation
+6. ✅ `/setup`, sales history, stock-in history, staff cash count
+7. ✅ PIN attempt limit
+8. ⬜ Go-live: Neon on PC, Vercel deploy, clean production seed
 
 ## Decisions
 - No wall board / kiosk screen: the owner dashboard with the Both toggle covers it.
@@ -72,3 +83,8 @@ Staff do only **3 actions**: বিক্রি (sell), মাল তোলা (
 - Customers, suppliers and payments are scoped per shop.
 - Counted cash is stored in `cash_counts`.
 - Purchases stay single-item, one row per product bought.
+- Database driver is `pg` (node-postgres) with Neon's pooled URL; the same code runs on a local Postgres.
+- Sales history is view only; mistakes are fixed with Return mode, so the record stays clean.
+- Staff are deactivated, never deleted, so their past sales stay.
+- Staff count cash from the Expense sheet (no 4th nav button).
+- Owner can add staff and owners; at least one active owner is always kept.

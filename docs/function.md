@@ -1,8 +1,8 @@
 # Function Blueprint
 
-A high-level overview of the app structure. It is a **guide, not a strict rule**: files and functions can grow or shrink with complexity. Details get filled in step by step once the Next.js app is connected to Neon.
+A high-level overview of the app structure. It is a **guide, not a strict rule**: files and functions grow or shrink with complexity.
 
-**Starting estimate:** about 20 `.ts` + 35 `.tsx` files, about 80–85 functions.
+**Now:** 33 `.ts` + 47 `.tsx` files (+11 shadcn), 44 Server Actions. (Starting estimate was 20 + 35 files, 80–85 functions.)
 
 ## Principles
 - One file = one domain.
@@ -18,7 +18,7 @@ src/
 ├─ actions/        Server Actions, one file per domain (return { ok, data | error })
 ├─ api/            Client wrapper: same names, throws on error
 ├─ db/             Drizzle schema, pg client, time helpers, seed
-├─ lib/            Session, helpers, calculations
+├─ lib/            Session, login limit, result helpers, formatting, calculations
 ├─ types/          Shared types (schema.md) + Zod
 ├─ hooks/          Client state (cart, session, data loading)
 ├─ app/            Pages + layouts
@@ -29,11 +29,26 @@ src/
 | Area | Files | Responsibility |
 |---|---|---|
 | Actions | `auth`, `users`, `sales`, `products`, `purchases`, `parties`, `expenses`, `cash`, `reports` | Read and write data for each domain |
-| DB | `schema`, `index`, `seed` | Tables, connection, sample data |
-| Lib | `session`, `action`, `result`, `session-store`, `utils`, `calc` | PIN session, formatting (Taka, dates, WhatsApp link), profit and reorder math |
+| DB | `schema`, `index`, `time`, `products`, `seed`, `seed-data` | Tables, connection, Dhaka time SQL, shared product reads, demo data |
+| Lib | `session`, `login-limit`, `action`, `result`, `session-store`, `utils`, `calc` | PIN session + guards, attempt limit, `{ ok, data \| error }`, client user cache, formatting (Taka, dates, WhatsApp), profit and reorder math |
 | Types | `index`, `validations` | Interfaces and Zod schemas |
-| Hooks | `use-cart`, `use-session`, `use-query` | POS cart, current user, page data loading |
+| Hooks | `use-cart`, `use-session`, `use-shops`, `use-query` | POS cart, current user, shops, page data loading |
 | Config | `proxy`, `drizzle.config` | Route protection, migrations |
+
+## Server Actions (44)
+| File | Functions | Who |
+|---|---|---|
+| `auth` | `login`, `logout`, `getMe`, `getShops`, `switchShop` | All (switch: owner) |
+| `users` | `getUsers`, `createUser`, `updateUser`, `setUserActive`, `getLoginLocks`, `unlockLogin` | Owner |
+| `sales` | `searchProducts`, `getRecentProducts`, `createSale`, `getSales` | Shop users |
+| `products` | `getProducts`, `getProduct`, `createProduct`, `updateProduct`, `toggleProductActive`, `saveVariant`, `deleteVariant` | Read: shop users · write: owner |
+| `purchases` | `createPurchase`, `getPurchases`, `getLastCost` | Shop users (`getLastCost`: owner) |
+| `parties` | `getParties`, `saveParty`, `updateParty`, `getDues`, `recordPayment` | Shop users (dues, payments: owner) |
+| `expenses` | `createExpense`, `getExpenses`, `getTodayExpenses`, `deleteExpense` | Shop users (delete: owner) |
+| `cash` | `getExpectedCash`, `saveCashCount`, `getCashCounts` | Shop users |
+| `reports` | `getDashboard`, `getComparison`, `getBestsellers`, `getPeakTimes`, `getMonthlyReport`, `getLowStock`, `getDeadStock` | Owner (dashboard + stock alerts: shop users) |
+
+Staff never receive cost price or profit. The client calls these through `src/api/` (same names).
 
 ## Frontend (`.tsx`)
 | Page | Purpose | Component group |
@@ -49,13 +64,11 @@ src/
 Shared UI (Numpad, StatCard, DataTable, Money) lives in `components/shared/`. shadcn files in `components/ui/` are not tracked here.
 
 ## Build Steps
-1. Set up the Next.js app and connect Neon + Drizzle
-2. Schema + seed
-3. Login + session
-4. `/sell`
-5. `/stock`
-6. `/` dashboard
-7. `/hisab`
-8. Polish + PWA
+1. ✅ Next.js app, frontend with mock data, polish + PWA
+2. ✅ Drizzle schema, migrations, seed
+3. ✅ Login + session + guards
+4. ✅ Server Actions for every page, Zod validation
+5. ✅ `/setup`, sales / stock-in history, staff cash count, PIN limit
+6. ⬜ Go-live: Neon, Vercel, clean production seed
 
-Update this file at each step as functions are added.
+Update this file as functions are added.

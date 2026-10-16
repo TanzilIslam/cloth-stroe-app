@@ -1,6 +1,6 @@
 # Master Schema
 
-Shared by frontend and backend. Copy to `src/types/` when the code is set up.
+Shared by frontend and backend. Lives in `src/types/index.ts`; keep this file in sync. Database tables are in `src/db/schema.ts`.
 
 ## Enums
 
@@ -149,6 +149,18 @@ export interface CashCount {
   date: Date;
 }
 ```
+
+## Other Types (in `src/types/index.ts`)
+
+| Group | Types |
+|---|---|
+| Session / users | `SessionUser` (no PIN hash, no active flag), `UserRow`, `UserInput` |
+| Products | `ProductWithVariants`, `ProductInput`, `VariantInput` |
+| Write inputs | `SaleItemInput`, `SaleInput`, `PurchaseInput`, `PartyInput`, `PaymentInput`, `ExpenseInput` |
+| Reports | `DashboardStats`, `Bestsellers`, `PeakTimes`, `NamedValue`, `MonthRow`, `CashSummary`, `DueRow`, `LowStockRow`, `DeadStockRow` |
+| History | `SaleDetail` (sale + items, staff, customer), `PurchaseRow` (stock in + names) |
+
+`login_attempts` is server-only and has no shared type.
 
 ## Zod Validation
 
