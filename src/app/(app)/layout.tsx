@@ -7,7 +7,8 @@ import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
 import { BottomNav } from "@/components/layout/bottom-nav"
-import { OWNER_ONLY } from "@/components/layout/nav-items"
+import { useConfirm } from "@/components/shared/confirm-dialog"
+import { Loading } from "@/components/shared/load-state"
 import { Sidebar } from "@/components/layout/sidebar"
 import {
   ExpenseForm,
@@ -23,6 +24,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet"
+import { useAction } from "@/hooks/use-action"
 import { useQuery } from "@/hooks/use-query"
 import { useSession } from "@/hooks/use-session"
 import { useShops } from "@/hooks/use-shops"
@@ -35,6 +37,7 @@ import {
   saveCashCount,
   switchShop,
 } from "@/api"
+import { OWNER_ONLY, ROUTES } from "@/lib/routes"
 import { setSessionUser } from "@/lib/session-store"
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -54,13 +57,26 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       shopId && expenseOpen ? getExpectedCash(shopId) : Promise.resolve(null),
     [shopId, expenseOpen]
   )
+  const [confirm, confirmDialog] = useConfirm()
+  const shopSwitch = useAction(switchShop, {
+    success: (u) =>
+      `Now in ${shops.find((s) => s.id === u.shopId)?.name ?? "the shop"}`,
+    onDone: setSessionUser,
+  })
+  const removeExpense = useAction(deleteExpense, {
+    success: "Expense deleted",
+    onDone: () => {
+      todayExpenses.reload()
+      cash.reload()
+    },
+  })
 
   const blocked =
     user?.role === "staff" && OWNER_ONLY.some((p) => pathname.startsWith(p))
 
   useEffect(() => {
-    if (user === null) router.replace("/login")
-    else if (blocked) router.replace("/sell")
+    if (user === null) router.replace(ROUTES.login)
+    else if (blocked) router.replace(ROUTES.sell)
   }, [user, blocked, router])
 
   if (!user || blocked) {
@@ -75,8 +91,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     setSessionUser(null)
   }
 
-  async function handleShopChange(shopId: number) {
-    setSessionUser(await switchShop(shopId))
+  function handleShopChange(shopId: number) {
+    if (!shopSwitch.pending) shopSwitch.run(shopId)
   }
 
   async function saveExpense(values: ExpenseValues) {
@@ -142,21 +158,32 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <ExpenseForm onSubmit={saveExpense} />
               <div>
                 <h3 className="mb-2 text-sm font-medium">Today</h3>
-                <ExpenseList
-                  expenses={todayExpenses.data ?? []}
-                  empty="No expenses today"
-                  onDelete={
-                    user.role === "owner"
-                      ? async (id) => {
-                          await deleteExpense(id)
-                          todayExpenses.reload()
-                        }
-                      : undefined
-                  }
-                />
+                {todayExpenses.loading ? (
+                  <Loading />
+                ) : (
+                  <ExpenseList
+                    expenses={todayExpenses.data ?? []}
+                    empty="No expenses today"
+                    onDelete={
+                      user.role === "owner"
+                        ? async (id) => {
+                            const ok = await confirm({
+                              title: "Delete this expense?",
+                              message:
+                                "It will be removed from today's list and all reports.",
+                              confirmLabel: "Delete",
+                              danger: true,
+                            })
+                            if (ok) await removeExpense.run(id)
+                          }
+                        : undefined
+                    }
+                  />
+                )}
               </div>
             </TabsContent>
             <TabsContent value="cash" className="mt-3">
+              {cash.loading && <Loading />}
               {cash.data && (
                 <CashCountForm
                   summary={cash.data}
@@ -178,6 +205,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </Tabs>
         </SheetContent>
       </Sheet>
+      {confirmDialog}
     </div>
   )
 }

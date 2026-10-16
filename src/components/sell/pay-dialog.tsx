@@ -21,7 +21,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import type { Customer, ID, PaymentMethod } from "@/types"
+import {
+  PAYMENT_LABELS,
+  PAYMENT_METHODS,
+  type Customer,
+  type ID,
+  type PaymentMethod,
+} from "@/types"
 
 export interface Payment {
   method: PaymentMethod
@@ -39,11 +45,10 @@ interface PayDialogProps {
   onConfirm: (payment: Payment) => Promise<void>
 }
 
-const METHODS: { value: PaymentMethod; label: string }[] = [
-  { value: "cash", label: "Cash" },
-  { value: "bKash", label: "bKash" },
-  { value: "due", label: "Due" },
-]
+const METHODS = PAYMENT_METHODS.map((value) => ({
+  value,
+  label: PAYMENT_LABELS[value],
+}))
 
 export function PayDialog(props: PayDialogProps) {
   return (

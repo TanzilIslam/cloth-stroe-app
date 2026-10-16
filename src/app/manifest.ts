@@ -1,12 +1,14 @@
 // PWA manifest: lets staff add the app to their phone's home screen.
 import type { MetadataRoute } from "next"
 
+import { ROUTES } from "@/lib/routes"
+
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Shop Dashboard",
     short_name: "Shop",
     description: "Sales, stock and hisab for the shops",
-    start_url: "/login",
+    start_url: ROUTES.login,
     display: "standalone",
     orientation: "portrait",
     background_color: "#ffffff",

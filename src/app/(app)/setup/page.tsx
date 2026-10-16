@@ -10,6 +10,7 @@ import { PageHeader } from "@/components/layout/page-header"
 import { PartyForm, type PartyValues } from "@/components/setup/party-form"
 import { UserForm } from "@/components/setup/user-form"
 import { DataTable } from "@/components/shared/data-table"
+import { useConfirm } from "@/components/shared/confirm-dialog"
 import { LoadError, Loading, queryStatus } from "@/components/shared/load-state"
 import { Money } from "@/components/shared/money"
 import { Badge } from "@/components/ui/badge"
@@ -32,6 +33,7 @@ import {
   updateParty,
   updateUser,
 } from "@/api"
+import { useAction } from "@/hooks/use-action"
 import { useQuery } from "@/hooks/use-query"
 import { useSession } from "@/hooks/use-session"
 import { useShops } from "@/hooks/use-shops"
@@ -56,6 +58,18 @@ export default function SetupPage() {
   const status = queryStatus(users, customers, suppliers)
 
   const [editing, setEditing] = useState<Editing>(null)
+  const [confirm, confirmDialog] = useConfirm()
+  const unlock = useAction(unlockLogin, {
+    success: "Unlocked",
+    onDone: () => locks.reload(),
+  })
+  const setActive = useAction(setUserActive, {
+    success: (u) => (u.active ? "User activated" : "User deactivated"),
+    onDone: () => {
+      close()
+      users.reload()
+    },
+  })
   const close = () => setEditing(null)
 
   async function savePartyForm(
@@ -130,10 +144,14 @@ export default function SetupPage() {
                     <Button
                       size="sm"
                       variant="outline"
+                      disabled={unlock.pending}
                       onClick={async () => {
-                        await unlockLogin(l.ip)
-                        toast.success("Unlocked")
-                        locks.reload()
+                        const ok = await confirm({
+                          title: "Unlock this device?",
+                          message: `${l.ip} can try PINs again right away.`,
+                          confirmLabel: "Unlock",
+                        })
+                        if (ok) await unlock.run(l.ip)
                       }}
                     >
                       Unlock
@@ -235,19 +253,19 @@ export default function SetupPage() {
                 <Button
                   variant="ghost"
                   className={editingUser.active ? "text-destructive" : ""}
+                  disabled={setActive.pending}
                   onClick={async () => {
-                    try {
-                      await setUserActive(editingUser.id, !editingUser.active)
-                      toast.success(
-                        editingUser.active
-                          ? "User deactivated"
-                          : "User activated"
-                      )
-                      close()
-                      users.reload()
-                    } catch (e) {
-                      toast.error((e as Error).message)
+                    if (editingUser.active) {
+                      const ok = await confirm({
+                        title: `Deactivate ${editingUser.name}?`,
+                        message:
+                          "They can't log in any more. Their past sales stay.",
+                        confirmLabel: "Deactivate",
+                        danger: true,
+                      })
+                      if (!ok) return
                     }
+                    await setActive.run(editingUser.id, !editingUser.active)
                   }}
                 >
                   {editingUser.active
@@ -277,6 +295,7 @@ export default function SetupPage() {
           )}
         </DialogContent>
       </Dialog>
+      {confirmDialog}
     </div>
   )
 }

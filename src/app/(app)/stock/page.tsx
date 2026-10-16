@@ -7,6 +7,7 @@ import { useState } from "react"
 import { toast } from "sonner"
 
 import { PageHeader } from "@/components/layout/page-header"
+import { useConfirm } from "@/components/shared/confirm-dialog"
 import { LoadError, Loading, queryStatus } from "@/components/shared/load-state"
 import { ProductForm } from "@/components/stock/product-form"
 import { ProductTable } from "@/components/stock/product-table"
@@ -26,6 +27,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useAction } from "@/hooks/use-action"
 import { useQuery } from "@/hooks/use-query"
 import { useSession } from "@/hooks/use-session"
 import {
@@ -60,6 +62,22 @@ export default function StockPage() {
   // null = closed, "new" = create, number = edit that product
   const [editing, setEditing] = useState<"new" | ID | null>(null)
   const [stockIn, setStockIn] = useState<StockInTarget | "blank" | null>(null)
+  const [confirm, confirmDialog] = useConfirm()
+  const addVariant = useAction(saveVariant, {
+    success: "Variant added",
+    onDone: () => {
+      products.reload()
+      lowStock.reload()
+    },
+  })
+  const removeVariant = useAction(deleteVariant, {
+    success: "Variant deleted",
+    onDone: () => products.reload(),
+  })
+  const toggleActive = useAction(toggleProductActive, {
+    success: (p) => (p.active ? "Product activated" : "Product deactivated"),
+    onDone: () => reloadAll(),
+  })
 
   const status = queryStatus(products, suppliers, lowStock, deadStock, history)
   const all = products.data ?? []
@@ -151,13 +169,17 @@ export default function StockPage() {
         </TabsContent>
 
         <TabsContent value="alerts" className="mt-3">
-          <StockAlerts
-            lowStock={lowStock.data ?? []}
-            deadStock={deadStock.data ?? []}
-            onRestock={(productId, variantId, qty) =>
-              setStockIn({ productId, variantId, qty })
-            }
-          />
+          {lowStock.loading || deadStock.loading ? (
+            <Loading />
+          ) : (
+            <StockAlerts
+              lowStock={lowStock.data ?? []}
+              deadStock={deadStock.data ?? []}
+              onRestock={(productId, variantId, qty) =>
+                setStockIn({ productId, variantId, qty })
+              }
+            />
+          )}
         </TabsContent>
         <TabsContent value="history" className="mt-3">
           {history.loading ? (
@@ -190,19 +212,23 @@ export default function StockPage() {
           {editProduct?.hasVariants && (
             <VariantForm
               variants={editProduct.variants}
-              onAdd={async (size, color, openingStock) => {
-                await saveVariant({
+              onAdd={async (size, color, openingStock) =>
+                !!(await addVariant.run({
                   productId: editProduct.id,
                   size,
                   color,
                   openingStock,
-                })
-                products.reload()
-                lowStock.reload()
-              }}
+                }))
+              }
               onDelete={async (id) => {
-                await deleteVariant(id)
-                products.reload()
+                const ok = await confirm({
+                  title: "Delete this variant?",
+                  message:
+                    "Only variants with no stock and no sales can be deleted.",
+                  confirmLabel: "Delete",
+                  danger: true,
+                })
+                if (ok) await removeVariant.run(id)
               }}
             />
           )}
@@ -210,9 +236,19 @@ export default function StockPage() {
             <Button
               variant="ghost"
               className={editProduct.active ? "text-destructive" : ""}
+              disabled={toggleActive.pending}
               onClick={async () => {
-                await toggleProductActive(editProduct.id)
-                reloadAll()
+                if (editProduct.active) {
+                  const ok = await confirm({
+                    title: `Deactivate ${editProduct.name}?`,
+                    message:
+                      "It disappears from selling and stock in. Past sales stay.",
+                    confirmLabel: "Deactivate",
+                    danger: true,
+                  })
+                  if (!ok) return
+                }
+                await toggleActive.run(editProduct.id)
               }}
             >
               {editProduct.active ? "Deactivate product" : "Activate product"}
@@ -241,6 +277,7 @@ export default function StockPage() {
           )}
         </DialogContent>
       </Dialog>
+      {confirmDialog}
     </div>
   )
 }

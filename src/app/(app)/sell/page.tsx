@@ -32,6 +32,7 @@ import {
   searchProducts,
 } from "@/api"
 import { cn, formatTaka } from "@/lib/utils"
+import { ROUTES } from "@/lib/routes"
 import type { ProductWithVariants } from "@/types"
 
 export default function SellPage() {
@@ -94,7 +95,7 @@ export default function SellPage() {
           actions={
             <div className="flex gap-2">
               <Button variant="outline" size="icon" asChild>
-                <Link href="/sell/history" aria-label="Sales history">
+                <Link href={ROUTES.salesHistory} aria-label="Sales history">
                   <History />
                 </Link>
               </Button>

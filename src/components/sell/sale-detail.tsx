@@ -1,7 +1,7 @@
 // Sale details: items, discount, paid, due, customer and staff.
 import { Money } from "@/components/shared/money"
 import { formatDate, formatTime } from "@/lib/utils"
-import type { SaleDetail as SaleDetailData } from "@/types"
+import { PAYMENT_LABELS, type SaleDetail as SaleDetailData } from "@/types"
 
 export function SaleDetail({ sale }: { sale: SaleDetailData }) {
   const net = sale.total - sale.discount
@@ -10,10 +10,10 @@ export function SaleDetail({ sale }: { sale: SaleDetailData }) {
     ...(sale.discount ? [{ label: "Discount", value: -sale.discount }] : []),
     { label: net < 0 ? "Refund" : "Total", value: net, strong: true },
     {
-      label: `Paid (${sale.method === "due" ? "none" : sale.method})`,
+      label: `Paid (${sale.method === "due" ? "none" : PAYMENT_LABELS[sale.method]})`,
       value: sale.paid,
     },
-    ...(sale.due ? [{ label: "Due", value: sale.due }] : []),
+    ...(sale.due ? [{ label: PAYMENT_LABELS.due, value: sale.due }] : []),
   ]
 
   return (

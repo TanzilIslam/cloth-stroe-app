@@ -2,7 +2,7 @@
 import { Money } from "@/components/shared/money"
 import { Badge } from "@/components/ui/badge"
 import { formatTime } from "@/lib/utils"
-import type { SaleDetail } from "@/types"
+import { PAYMENT_LABELS, type SaleDetail } from "@/types"
 
 interface SaleListProps {
   sales: SaleDetail[]
@@ -52,9 +52,7 @@ export function SaleList({ sales, onSelect }: SaleListProps) {
               ) : s.due > 0 ? (
                 <Badge variant="outline">Due</Badge>
               ) : (
-                <Badge variant="secondary">
-                  {s.method === "bKash" ? "bKash" : "Cash"}
-                </Badge>
+                <Badge variant="secondary">{PAYMENT_LABELS[s.method]}</Badge>
               )}
               <Money amount={net} className="w-20 text-right font-semibold" />
             </button>

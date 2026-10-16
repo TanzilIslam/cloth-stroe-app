@@ -13,6 +13,12 @@ export const EXPENSE_CATEGORIES = [
 ] as const
 export const PARTY_TYPES = ["customer", "supplier"] as const
 
+export const PAYMENT_LABELS = {
+  cash: "Cash",
+  bKash: "bKash",
+  due: "Due",
+} as const
+
 export type ShopType = (typeof SHOP_TYPES)[number]
 export type Role = (typeof ROLES)[number]
 export type Unit = (typeof UNITS)[number]

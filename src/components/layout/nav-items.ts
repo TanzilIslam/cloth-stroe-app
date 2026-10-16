@@ -8,6 +8,7 @@ import {
   type LucideIcon,
 } from "lucide-react"
 
+import { ROUTES } from "@/lib/routes"
 import type { Role } from "@/types"
 
 export interface NavItem {
@@ -17,11 +18,11 @@ export interface NavItem {
 }
 
 const all = {
-  dashboard: { href: "/", label: "Dashboard", icon: LayoutDashboard },
-  sell: { href: "/sell", label: "Sell", icon: ShoppingCart },
-  stock: { href: "/stock", label: "Stock", icon: Package },
-  hisab: { href: "/hisab", label: "Hisab", icon: BookOpen },
-  setup: { href: "/setup", label: "Setup", icon: Settings },
+  dashboard: { href: ROUTES.home, label: "Dashboard", icon: LayoutDashboard },
+  sell: { href: ROUTES.sell, label: "Sell", icon: ShoppingCart },
+  stock: { href: ROUTES.stock, label: "Stock", icon: Package },
+  hisab: { href: ROUTES.hisab, label: "Hisab", icon: BookOpen },
+  setup: { href: ROUTES.setup, label: "Setup", icon: Settings },
 } satisfies Record<string, NavItem>
 
 export const NAV_ITEMS: Record<Role, NavItem[]> = {
@@ -29,9 +30,8 @@ export const NAV_ITEMS: Record<Role, NavItem[]> = {
   staff: [all.sell, all.stock],
 }
 
-/** Routes staff cannot open. */
-export const OWNER_ONLY = ["/hisab", "/setup"]
-
 export function isActive(pathname: string, href: string) {
-  return href === "/" ? pathname === "/" : pathname.startsWith(href)
+  return href === ROUTES.home
+    ? pathname === ROUTES.home
+    : pathname.startsWith(href)
 }

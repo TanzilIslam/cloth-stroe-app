@@ -6,7 +6,7 @@ import { useState } from "react"
 import { Money } from "@/components/shared/money"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import type { DueRow, PaymentInput } from "@/types"
+import { PAYMENT_LABELS, type DueRow, type PaymentInput } from "@/types"
 
 export type PaymentValues = Pick<PaymentInput, "amount" | "method">
 
@@ -62,7 +62,7 @@ export function PaymentForm({ row, onSubmit }: PaymentFormProps) {
             variant={method === m ? "default" : "outline"}
             onClick={() => setMethod(m)}
           >
-            {m === "cash" ? "Cash" : "bKash"}
+            {PAYMENT_LABELS[m]}
           </Button>
         ))}
       </div>

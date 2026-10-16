@@ -10,21 +10,21 @@ Suggested order: 1 → 2 → 3 → 6, then 4 and 5 when the data grows.
 ---
 
 ## 1. Reusable building blocks
-- [ ] **Error messages as constants** (`src/lib/errors.ts`): "Owner only", "Not your shop", "Please log in again", "Not enough stock" and others are typed in many files. One `ERRORS` object keeps wording consistent, and tests can import it.
+- [x] **Error messages as constants** (`src/lib/errors.ts`): "Owner only", "Not your shop", "Please log in again", "Not enough stock" and others are typed in many files. One `ERRORS` object keeps wording consistent, and tests can import it.
 - [ ] **Action helper:** every action repeats `run()` → access check → `parse(schema)`. Add a helper such as
   `action({ access: "owner" | "shop" | "user", schema }, async (input, user) => …)`
   so each action is one line of setup and can't forget a check.
-- [ ] **One cookie name:** `proxy.ts` and `src/lib/session.ts` each define `shop_session` ("keep in sync" comment). Move it to a tiny shared module both import.
-- [ ] **Variant label helper:** `[size, color].filter(Boolean).join(" · ")` is built in `sales.ts`, `purchases.ts` and several components. Add `variantLabel()` in `src/lib/utils.ts`.
-- [ ] **SQL helpers in one file:** `sum()` / `total()` are copied in `cash.ts` and `reports.ts`. Move them to `src/db/sql.ts` with `todayStart`, `daysAgo` and `local`.
+- [x] **One cookie name:** `proxy.ts` and `src/lib/session.ts` each define `shop_session` ("keep in sync" comment). Move it to a tiny shared module both import.
+- [x] **Variant label helper:** `[size, color].filter(Boolean).join(" · ")` is built in `sales.ts`, `purchases.ts` and several components. Add `variantLabel()` in `src/lib/utils.ts`.
+- [x] **SQL helpers in one file:** `sum()` / `total()` are copied in `cash.ts` and `reports.ts`. Move them to `src/db/sql.ts` with `todayStart`, `daysAgo` and `local`.
 - [ ] **One "staff view":** hiding cost and profit from staff is done separately in `forUser`, `getPurchases` and `getDashboard`. Make one place that decides what staff may see, so a new action can't leak cost by mistake.
 
 **Outcome:** shared rules and wording live in one place; new actions are shorter and safer by default.
 
 ## 2. Data safety in the database
-- [ ] **CHECK constraints** (migration): `stock_qty >= 0` on products and variants, `due_balance >= 0`, `payable_balance >= 0`, `sale_items.qty <> 0`, `purchases.qty > 0`, `amount > 0` on expenses and payments. The app already checks; the database becomes the last guard.
+- [x] **CHECK constraints** (migration): `stock_qty >= 0` on products and variants, `due_balance >= 0`, `payable_balance >= 0`, `sale_items.qty <> 0`, `purchases.qty > 0`, `amount > 0` on expenses and payments. The app already checks; the database becomes the last guard.
 - [ ] **Unique rules per shop:** product `barcode` (when not null) and customer `phone` (when not empty), so two products can't share one barcode.
-- [ ] **Money rounding:** totals are computed in JavaScript with decimals (e.g. 2.5 × 325). Round every money value to 2 decimals on the server before saving (`roundMoney()` in `src/lib/calc.ts`), and test it.
+- [x] **Money rounding:** totals are computed in JavaScript with decimals (e.g. 2.5 × 325). Round every money value to 2 decimals on the server before saving (`roundMoney()` in `src/lib/calc.ts`), and test it.
 - [ ] **Soft delete for expenses:** add `deleted_at` instead of deleting the row; reports ignore deleted rows. Nothing money-related disappears for good.
 - [ ] **Audit log** (`audit_log` table: who, when, action, before / after JSON): price changes, product deactivation, expense delete, payment, user changes, unlock. Owner can view it on `/setup`.
 - [ ] **Payments link:** `payments.party_id` points to either a customer or a supplier with no foreign key. Split into `customer_id` / `supplier_id` (one of them set), each with a real foreign key.
@@ -34,7 +34,7 @@ Suggested order: 1 → 2 → 3 → 6, then 4 and 5 when the data grows.
 ## 3. Errors and API shape
 - [ ] **Error codes:** `Result` errors carry only a message. Add a code, e.g. `{ ok: false, code: "UNAUTHORIZED" | "FORBIDDEN" | "VALIDATION" | "CONFLICT", error }`. The client then sends an expired session straight to `/login` instead of showing a message.
 - [ ] **Error tracking:** unexpected errors only reach Vercel logs. Add Sentry (or similar) for server and client errors, without sending PINs or session data.
-- [ ] **Validate env at startup** (`src/lib/env.ts` with Zod): fail fast with a clear message when `DATABASE_URL` or `SESSION_SECRET` is missing or too short.
+- [x] **Validate env at startup** (`src/lib/env.ts` with Zod): fail fast with a clear message when `DATABASE_URL` or `SESSION_SECRET` is missing or too short.
 
 **Outcome:** failures are handled the same way everywhere, and problems in production are visible.
 
@@ -49,7 +49,7 @@ Suggested order: 1 → 2 → 3 → 6, then 4 and 5 when the data grows.
 **Outcome:** pages stay fast with years of sales and many users.
 
 ## 5. Time zone
-- [ ] **One time zone constant** (`SHOP_TZ = "Asia/Dhaka"`) used by `src/db/time.ts` SQL (instead of the literal string in each snippet) and by the UI helpers.
+- [x] **One time zone constant** (`SHOP_TZ = "Asia/Dhaka"`) used by `src/db/time.ts` SQL (instead of the literal string in each snippet) and by the UI helpers.
 - [ ] **Seed data in shop time:** `src/db/seed-data.ts` sets hours with the server's local clock. Generate them in Dhaka time so demo peak hours look right on any server.
 
 **Outcome:** changing the shop's time zone is a one-line change.

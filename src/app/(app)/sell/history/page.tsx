@@ -22,7 +22,7 @@ import { getSales } from "@/api"
 import { useQuery } from "@/hooks/use-query"
 import { useSession } from "@/hooks/use-session"
 import { shopDay } from "@/lib/utils"
-import type { SaleDetail as SaleDetailData } from "@/types"
+import { PAYMENT_LABELS, type SaleDetail as SaleDetailData } from "@/types"
 
 export default function SalesHistoryPage() {
   const user = useSession()!
@@ -88,7 +88,7 @@ export default function SalesHistoryPage() {
               hint={`${rows.length} sales`}
             />
             <StatCard
-              label="Cash"
+              label={PAYMENT_LABELS.cash}
               value={
                 <Money
                   amount={sum((s) => (s.method === "cash" ? s.paid : 0))}
@@ -96,7 +96,7 @@ export default function SalesHistoryPage() {
               }
             />
             <StatCard
-              label="bKash"
+              label={PAYMENT_LABELS.bKash}
               value={
                 <Money
                   amount={sum((s) => (s.method === "bKash" ? s.paid : 0))}
@@ -104,7 +104,7 @@ export default function SalesHistoryPage() {
               }
             />
             <StatCard
-              label="Due"
+              label={PAYMENT_LABELS.due}
               value={<Money amount={sum((s) => s.due)} />}
             />
           </div>

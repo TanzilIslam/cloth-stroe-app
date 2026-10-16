@@ -5,6 +5,7 @@ import Link from "next/link"
 import { Money } from "@/components/shared/money"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { daysSince } from "@/lib/calc"
+import { ROUTES } from "@/lib/routes"
 import type { DueRow, LowStockRow } from "@/types"
 import { variantLabel } from "@/lib/utils"
 
@@ -24,7 +25,7 @@ export function AlertsCard({ lowStock, dues }: AlertsCardProps) {
       <CardContent className="flex flex-col gap-4 text-sm">
         <section>
           <Link
-            href="/stock"
+            href={ROUTES.stock}
             className="mb-1 flex items-center gap-2 font-medium pointer-coarse:min-h-11"
           >
             <Package className="size-4" /> Low stock ({lowStock.length})
@@ -52,7 +53,7 @@ export function AlertsCard({ lowStock, dues }: AlertsCardProps) {
         </section>
         <section>
           <Link
-            href="/hisab"
+            href={ROUTES.hisab}
             className="mb-1 flex items-center gap-2 font-medium pointer-coarse:min-h-11"
           >
             <Wallet className="size-4" /> Oldest dues

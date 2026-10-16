@@ -65,6 +65,10 @@ test("deactivating staff logs them out at once", async ({ page, browser }) => {
   await dialog(page)
     .getByRole("button", { name: /Deactivate/ })
     .click()
+  await page
+    .getByRole("dialog", { name: "Deactivate Rahim?" })
+    .getByRole("button", { name: "Deactivate" })
+    .click()
   await expectToast(page, "User deactivated")
   await expect(
     page.getByRole("row").filter({ hasText: "Rahim" })

@@ -95,6 +95,10 @@ test("5 wrong PINs lock the device; the owner unlocks it", async ({
   await owner.goto("/setup")
   await expect(owner.getByText("203.0.113.7")).toBeVisible()
   await owner.getByRole("button", { name: "Unlock" }).click()
+  await owner
+    .getByRole("dialog", { name: "Unlock this device?" })
+    .getByRole("button", { name: "Unlock" })
+    .click()
   await expect(owner.getByText("Unlocked")).toBeVisible()
 
   await enterPin(locked, PIN.rahim)

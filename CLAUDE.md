@@ -47,7 +47,10 @@ If `TEST_DATABASE_URL` isn't set, say that the DB / E2E suites were skipped. Nev
 
 ## Code Conventions (short)
 - Server Actions in `src/actions/<domain>.ts`: start with `"use server"`, wrap the body in `run()`, check access first (`requireUser` / `requireOwner` / `requireShop`), validate input with `parse(schema, input)`, and throw `ActionError` for messages the user should see.
+- User-facing error text comes from `ERRORS` (`src/lib/errors.ts`); URLs from `ROUTES` (`src/lib/routes.ts`); shop time zone and cookie name from `src/lib/config.ts`.
 - Client code imports actions only through `src/api/` (same names, throws on error).
+- Buttons that call an action use `useAction` (pending + toasts); deletes / deactivations ask first with `useConfirm()`.
+- Money and qty computed on the server go through `roundMoney()`; the database also has CHECK constraints (`drizzle/0003`).
 - Stock or balance changes go in one `db.transaction`.
 - Staff must never receive cost price or profit.
 - "Today", hours and dates use Asia/Dhaka (`src/db/time.ts`, `shopDay` / `formatDate` in `src/lib/utils.ts`).

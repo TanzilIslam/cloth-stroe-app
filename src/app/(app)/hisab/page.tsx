@@ -5,6 +5,7 @@ import { useState } from "react"
 import { toast } from "sonner"
 
 import { PageHeader } from "@/components/layout/page-header"
+import { useConfirm } from "@/components/shared/confirm-dialog"
 import { LoadError, Loading, queryStatus } from "@/components/shared/load-state"
 import { CashCountForm } from "@/components/hisab/cash-count-form"
 import { DuesList } from "@/components/hisab/dues-list"
@@ -25,6 +26,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useAction } from "@/hooks/use-action"
 import { useQuery } from "@/hooks/use-query"
 import { useSession } from "@/hooks/use-session"
 import {
@@ -60,6 +62,14 @@ export default function HisabPage() {
 
   const status = queryStatus(dues, expenses, cash, counts, report)
   const [settling, setSettling] = useState<DueRow | null>(null)
+  const [confirm, confirmDialog] = useConfirm()
+  const removeExpense = useAction(deleteExpense, {
+    success: "Expense deleted",
+    onDone: () => {
+      expenses.reload()
+      cash.reload()
+    },
+  })
 
   const dueRows = dues.data ?? []
   const owedToUs = dueRows
@@ -117,6 +127,7 @@ export default function HisabPage() {
         </TabsContent>
 
         <TabsContent value="expenses" className="mt-3 flex flex-col gap-3">
+          {expenses.loading && <Loading />}
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
             <StatCard
               label="This month"
@@ -140,14 +151,20 @@ export default function HisabPage() {
             expenses={monthExpenses}
             empty="No expenses this month"
             onDelete={async (id) => {
-              await deleteExpense(id)
-              expenses.reload()
-              cash.reload()
+              const ok = await confirm({
+                title: "Delete this expense?",
+                message:
+                  "It will be removed from the month's list and all reports.",
+                confirmLabel: "Delete",
+                danger: true,
+              })
+              if (ok) await removeExpense.run(id)
             }}
           />
         </TabsContent>
 
         <TabsContent value="cash" className="mt-3 grid gap-6 lg:grid-cols-2">
+          {cash.loading && <Loading />}
           {cash.data && (
             <CashCountForm
               key={counts.data?.length ?? 0}
@@ -192,7 +209,11 @@ export default function HisabPage() {
         </TabsContent>
 
         <TabsContent value="report" className="mt-3">
-          <MonthlyReport rows={report.data ?? []} />
+          {report.loading ? (
+            <Loading />
+          ) : (
+            <MonthlyReport rows={report.data ?? []} />
+          )}
         </TabsContent>
       </Tabs>
 
@@ -208,6 +229,7 @@ export default function HisabPage() {
           {settling && <PaymentForm row={settling} onSubmit={settle} />}
         </DialogContent>
       </Dialog>
+      {confirmDialog}
     </div>
   )
 }
