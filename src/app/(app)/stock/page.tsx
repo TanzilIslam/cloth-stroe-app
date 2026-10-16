@@ -10,6 +10,7 @@ import { PageHeader } from "@/components/layout/page-header"
 import { LoadError, Loading, queryStatus } from "@/components/shared/load-state"
 import { ProductForm } from "@/components/stock/product-form"
 import { ProductTable } from "@/components/stock/product-table"
+import { PurchaseList } from "@/components/stock/purchase-list"
 import { StockAlerts } from "@/components/stock/stock-alerts"
 import {
   StockInForm,
@@ -36,6 +37,7 @@ import {
   getLowStock,
   getParties,
   getProducts,
+  getPurchases,
   saveVariant,
   toggleProductActive,
   updateProduct,
@@ -53,12 +55,13 @@ export default function StockPage() {
   const suppliers = useQuery(() => getParties("supplier", shopId), [shopId])
   const lowStock = useQuery(() => getLowStock(shopId), [shopId])
   const deadStock = useQuery(() => getDeadStock(shopId), [shopId])
+  const history = useQuery(() => getPurchases(shopId), [shopId])
 
   // null = closed, "new" = create, number = edit that product
   const [editing, setEditing] = useState<"new" | ID | null>(null)
   const [stockIn, setStockIn] = useState<StockInTarget | "blank" | null>(null)
 
-  const status = queryStatus(products, suppliers, lowStock, deadStock)
+  const status = queryStatus(products, suppliers, lowStock, deadStock, history)
   const all = products.data ?? []
   const visible = isOwner ? all : all.filter((p) => p.active)
   const editProduct =
@@ -72,6 +75,7 @@ export default function StockPage() {
     suppliers.reload()
     lowStock.reload()
     deadStock.reload()
+    history.reload()
   }
 
   async function saveProduct(input: ProductInput) {
@@ -129,6 +133,7 @@ export default function StockPage() {
               </Badge>
             )}
           </TabsTrigger>
+          <TabsTrigger value="history">History</TabsTrigger>
         </TabsList>
 
         <TabsContent value="products" className="mt-3">
@@ -153,6 +158,13 @@ export default function StockPage() {
               setStockIn({ productId, variantId, qty })
             }
           />
+        </TabsContent>
+        <TabsContent value="history" className="mt-3">
+          {history.loading ? (
+            <Loading />
+          ) : (
+            <PurchaseList rows={history.data ?? []} showCost={isOwner} />
+          )}
         </TabsContent>
       </Tabs>
 

@@ -159,3 +159,8 @@ export const userSchema = z.object({
   shopId: idSchema,
   pin: pinSchema.nullable(),
 }) satisfies z.ZodType<UserInput>
+
+/** A calendar day in shop time, e.g. "2026-10-16". */
+export const daySchema = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "Pick a valid day")

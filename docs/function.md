@@ -40,8 +40,8 @@ src/
 |---|---|---|
 | `/login` | PIN login | `shared` (PinPad) |
 | `/` | Dashboard (This shop / Both) | `dashboard` |
-| `/sell` | POS | `sell` |
-| `/stock` | Products, stock in, alerts | `stock` |
+| `/sell` | POS; `/sell/history` = sales by day | `sell` |
+| `/stock` | Products, stock in, alerts, stock-in history | `stock` |
 | `/hisab` | Dues, expenses, cash, reports | `hisab` |
 | `/setup` | Owner: staff accounts, customers, suppliers | `setup` |
 | Layouts | Root + app shell (bottom nav / sidebar) | `layout` |

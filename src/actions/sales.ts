@@ -1,7 +1,7 @@
 "use server"
 
 // POS: product search, recent products, create sale (stock + due in one transaction).
-import { and, desc, eq, ilike, or, sql } from "drizzle-orm"
+import { and, desc, eq, gte, ilike, inArray, lt, or, sql } from "drizzle-orm"
 
 import { db } from "@/db"
 import { forUser, withVariants } from "@/db/products"
@@ -11,11 +11,14 @@ import {
   productVariants,
   saleItems,
   sales,
+  users,
 } from "@/db/schema"
+import { dayStart } from "@/db/time"
 import { ActionError, parse, run } from "@/lib/action"
 import { requireShop } from "@/lib/session"
-import type { ID, SaleInput } from "@/types"
+import type { ID, SaleDetail, SaleInput } from "@/types"
 import {
+  daySchema,
   idSchema,
   limitSchema,
   saleSchema,
@@ -169,14 +172,64 @@ export async function createSale(raw: SaleInput) {
   })
 }
 
-export async function getSales(shopId: ID) {
-  return run(async () => {
+/** One day's sales (shop time), newest first, with items, staff and customer. */
+export async function getSales(shopId: ID, day: string) {
+  return run(async (): Promise<SaleDetail[]> => {
     await requireShop(parse(idSchema, shopId))
-    return db
-      .select()
+    day = parse(daySchema, day)
+    const rows = await db
+      .select({
+        sale: sales,
+        userName: users.name,
+        customerName: customers.name,
+      })
       .from(sales)
-      .where(eq(sales.shopId, shopId))
+      .innerJoin(users, eq(sales.userId, users.id))
+      .leftJoin(customers, eq(sales.customerId, customers.id))
+      .where(
+        and(
+          eq(sales.shopId, shopId),
+          gte(sales.createdAt, dayStart(day)),
+          lt(sales.createdAt, dayStart(day, 1))
+        )
+      )
       .orderBy(desc(sales.createdAt))
-      .limit(100)
+    if (rows.length === 0) return []
+
+    const items = await db
+      .select({
+        saleId: saleItems.saleId,
+        productName: products.name,
+        unit: products.unit,
+        size: productVariants.size,
+        color: productVariants.color,
+        qty: saleItems.qty,
+        price: saleItems.price,
+      })
+      .from(saleItems)
+      .innerJoin(products, eq(saleItems.productId, products.id))
+      .leftJoin(productVariants, eq(saleItems.variantId, productVariants.id))
+      .where(
+        inArray(
+          saleItems.saleId,
+          rows.map((r) => r.sale.id)
+        )
+      )
+      .orderBy(saleItems.id)
+
+    return rows.map((r) => ({
+      ...r.sale,
+      userName: r.userName,
+      customerName: r.customerName,
+      items: items
+        .filter((i) => i.saleId === r.sale.id)
+        .map((i) => ({
+          productName: i.productName,
+          variant: [i.size, i.color].filter(Boolean).join(" · ") || null,
+          unit: i.unit,
+          qty: i.qty,
+          price: i.price,
+        })),
+    }))
   })
 }

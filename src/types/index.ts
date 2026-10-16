@@ -276,3 +276,24 @@ export interface UserInput {
   shopId: ID
   pin: string | null // null on edit = keep the current PIN
 }
+
+// History views
+
+export interface SaleDetail extends Sale {
+  userName: string
+  customerName: string | null
+  items: {
+    productName: string
+    variant: string | null // "M · Blue"
+    unit: Unit
+    qty: number
+    price: Money
+  }[]
+}
+
+export interface PurchaseRow extends Purchase {
+  productName: string
+  variant: string | null
+  unit: Unit
+  supplierName: string
+}

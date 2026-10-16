@@ -8,7 +8,7 @@ import { db, type Tx } from "@/db"
 import { products, productVariants, purchases, suppliers } from "@/db/schema"
 import { ActionError, parse, run } from "@/lib/action"
 import { requireOwner, requireShop } from "@/lib/session"
-import type { ID, PurchaseInput } from "@/types"
+import type { ID, PurchaseInput, PurchaseRow } from "@/types"
 import { idSchema, purchaseSchema } from "@/types/validations"
 
 async function lastCost(
@@ -137,15 +137,35 @@ export async function createPurchase(input: PurchaseInput) {
   })
 }
 
+/** Last 100 stock-ins with names. Staff don't see cost or paid. */
 export async function getPurchases(shopId: ID) {
-  return run(async () => {
-    await requireOwner()
-    shopId = parse(idSchema, shopId)
-    return db
-      .select()
+  return run(async (): Promise<PurchaseRow[]> => {
+    const user = await requireShop(parse(idSchema, shopId))
+    const rows = await db
+      .select({
+        purchase: purchases,
+        productName: products.name,
+        unit: products.unit,
+        size: productVariants.size,
+        color: productVariants.color,
+        supplierName: suppliers.name,
+      })
       .from(purchases)
+      .innerJoin(products, eq(purchases.productId, products.id))
+      .innerJoin(suppliers, eq(purchases.supplierId, suppliers.id))
+      .leftJoin(productVariants, eq(purchases.variantId, productVariants.id))
       .where(eq(purchases.shopId, shopId))
       .orderBy(desc(purchases.createdAt))
       .limit(100)
+    const isOwner = user.role === "owner"
+    return rows.map((r) => ({
+      ...r.purchase,
+      cost: isOwner ? r.purchase.cost : 0,
+      paid: isOwner ? r.purchase.paid : 0,
+      productName: r.productName,
+      unit: r.unit,
+      variant: [r.size, r.color].filter(Boolean).join(" · ") || null,
+      supplierName: r.supplierName,
+    }))
   })
 }

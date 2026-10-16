@@ -16,7 +16,10 @@ export function ComparisonCard({ today, lastWeek }: ComparisonCardProps) {
     : null
   const Icon =
     pct === null || pct === 0 ? Minus : pct > 0 ? ArrowUpRight : ArrowDownRight
-  const weekday = new Date().toLocaleDateString("en-GB", { weekday: "long" })
+  const weekday = new Date().toLocaleDateString("en-GB", {
+    timeZone: "Asia/Dhaka",
+    weekday: "long",
+  })
 
   return (
     <StatCard

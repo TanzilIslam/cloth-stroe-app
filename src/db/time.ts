@@ -14,3 +14,7 @@ export const daysAgo = (days: number) =>
 /** A timestamptz column / expression read in Dhaka local time. */
 export const local = (col: SQL | unknown) =>
   sql`(${col} AT TIME ZONE 'Asia/Dhaka')`
+
+/** Start of a "YYYY-MM-DD" day in Dhaka, plus `addDays`. */
+export const dayStart = (day: string, addDays = 0) =>
+  sql`((${day}::date + ${addDays}::int)::timestamp AT TIME ZONE 'Asia/Dhaka')`

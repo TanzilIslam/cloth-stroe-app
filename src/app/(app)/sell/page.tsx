@@ -1,7 +1,8 @@
 "use client"
 
 // POS: search / tap product → qty → pay. Tablet+: grid left, cart right.
-import { ShoppingCart, Undo2 } from "lucide-react"
+import { History, ShoppingCart, Undo2 } from "lucide-react"
+import Link from "next/link"
 import { useDeferredValue, useState } from "react"
 import { toast } from "sonner"
 
@@ -91,13 +92,20 @@ export default function SellPage() {
         <PageHeader
           title="Sell"
           actions={
-            <Button
-              variant={returnMode ? "destructive" : "outline"}
-              onClick={() => setReturnMode(!returnMode)}
-              aria-pressed={returnMode}
-            >
-              <Undo2 /> Return {returnMode ? "on" : "off"}
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" size="icon" asChild>
+                <Link href="/sell/history" aria-label="Sales history">
+                  <History />
+                </Link>
+              </Button>
+              <Button
+                variant={returnMode ? "destructive" : "outline"}
+                onClick={() => setReturnMode(!returnMode)}
+                aria-pressed={returnMode}
+              >
+                <Undo2 /> Return {returnMode ? "on" : "off"}
+              </Button>
+            </div>
           }
         />
         <ProductSearch
