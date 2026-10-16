@@ -151,8 +151,19 @@ export interface CashCount {
 
 ## Zod Validation
 
-```ts
-import { z } from "zod";
+Lives in `src/types/validations.ts`. One schema per action input, each checked with `satisfies z.ZodType<Interface>` so it can't drift from the interfaces above. Every Server Action calls `parse(schema, input)` first; the first problem comes back as the error message.
 
-// TODO: add when the API is ready
-```
+| Schema | Input | Key rules |
+|---|---|---|
+| `pinSchema` | login PIN | exactly 4 digits |
+| `saleSchema` | `SaleInput` | 1–100 items, qty ≠ 0, price / discount ≥ 0 |
+| `productSchema` / `productUpdateSchema` | `ProductInput` | name + category required, sell price > 0, numbers ≥ 0 |
+| `variantSchema` | `VariantInput` | size or color required |
+| `purchaseSchema` | `PurchaseInput` | qty > 0, cost / paid ≥ 0 |
+| `partySchema` | `PartyInput` | name required, phone digits only |
+| `paymentSchema` | `PaymentInput` | amount > 0, cash or bKash |
+| `expenseSchema` | `ExpenseInput` | known category, amount > 0 |
+| `cashCountSchema` | cash count | counted ≥ 0 |
+| `idSchema`, `shopIdsSchema`, `daysSchema`, `monthsSchema` | ids and report args | positive ints, sane ranges |
+
+Text is trimmed; empty optional text becomes `null`. Business rules (stock, balances, shop access) stay in the actions.

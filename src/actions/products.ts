@@ -6,29 +6,19 @@ import { and, asc, count, eq } from "drizzle-orm"
 import { db } from "@/db"
 import { forUser, withVariants } from "@/db/products"
 import { products, productVariants, saleItems, shops } from "@/db/schema"
-import { ActionError, run } from "@/lib/action"
+import { ActionError, parse, run } from "@/lib/action"
 import { requireOwner, requireShop, requireUser } from "@/lib/session"
 import type { ID, ProductInput, VariantInput } from "@/types"
-
-function validate(input: Partial<ProductInput>) {
-  if (input.name !== undefined && !input.name.trim())
-    throw new ActionError("Name is required")
-  if (input.category !== undefined && !input.category.trim())
-    throw new ActionError("Category is required")
-  if (input.sellPrice !== undefined && input.sellPrice <= 0)
-    throw new ActionError("Sell price must be more than 0")
-  if (
-    (input.costPrice ?? 0) < 0 ||
-    (input.stockQty ?? 0) < 0 ||
-    (input.lowStockAt ?? 0) < 0
-  ) {
-    throw new ActionError("Numbers can't be negative")
-  }
-}
+import {
+  idSchema,
+  productSchema,
+  productUpdateSchema,
+  variantSchema,
+} from "@/types/validations"
 
 export async function getProducts(shopId: ID) {
   return run(async () => {
-    const user = await requireShop(shopId)
+    const user = await requireShop(parse(idSchema, shopId))
     const rows = await db
       .select()
       .from(products)
@@ -41,6 +31,7 @@ export async function getProducts(shopId: ID) {
 export async function getProduct(id: ID) {
   return run(async () => {
     const user = await requireUser()
+    id = parse(idSchema, id)
     const [row] = await db.select().from(products).where(eq(products.id, id))
     if (!row) return null
     await requireShop(row.shopId)
@@ -52,7 +43,7 @@ export async function getProduct(id: ID) {
 export async function createProduct(input: ProductInput) {
   return run(async () => {
     await requireOwner()
-    validate(input)
+    input = parse(productSchema, input)
     const [shop] = await db
       .select()
       .from(shops)
@@ -69,7 +60,8 @@ export async function createProduct(input: ProductInput) {
 export async function updateProduct(id: ID, input: Partial<ProductInput>) {
   return run(async () => {
     await requireOwner()
-    validate(input)
+    id = parse(idSchema, id)
+    input = parse(productUpdateSchema, input)
     // shopId, stock and hasVariants never change through an edit
     const fields = {
       name: input.name?.trim(),
@@ -94,6 +86,7 @@ export async function updateProduct(id: ID, input: Partial<ProductInput>) {
 export async function toggleProductActive(id: ID) {
   return run(async () => {
     await requireOwner()
+    id = parse(idSchema, id)
     const [row] = await db.select().from(products).where(eq(products.id, id))
     if (!row) throw new ActionError("Product not found")
     const [updated] = await db
@@ -108,8 +101,7 @@ export async function toggleProductActive(id: ID) {
 export async function saveVariant(input: VariantInput) {
   return run(async () => {
     await requireOwner()
-    if (!input.size?.trim() && !input.color?.trim())
-      throw new ActionError("Add a size or color")
+    input = parse(variantSchema, input)
     const fields = {
       size: input.size?.trim() || null,
       color: input.color?.trim() || null,
@@ -139,6 +131,7 @@ export async function saveVariant(input: VariantInput) {
 export async function deleteVariant(id: ID) {
   return run(async () => {
     await requireOwner()
+    id = parse(idSchema, id)
     const [v] = await db
       .select()
       .from(productVariants)

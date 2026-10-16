@@ -6,9 +6,10 @@ import { and, desc, eq, isNull, sql } from "drizzle-orm"
 
 import { db, type Tx } from "@/db"
 import { products, productVariants, purchases, suppliers } from "@/db/schema"
-import { ActionError, run } from "@/lib/action"
+import { ActionError, parse, run } from "@/lib/action"
 import { requireOwner, requireShop } from "@/lib/session"
 import type { ID, PurchaseInput } from "@/types"
+import { idSchema, purchaseSchema } from "@/types/validations"
 
 async function lastCost(
   q: Tx | typeof db,
@@ -40,14 +41,18 @@ async function lastCost(
 export async function getLastCost(productId: ID, variantId: ID | null = null) {
   return run(async () => {
     await requireOwner()
-    return lastCost(db, productId, variantId)
+    return lastCost(
+      db,
+      parse(idSchema, productId),
+      parse(idSchema.nullable(), variantId)
+    )
   })
 }
 
 export async function createPurchase(input: PurchaseInput) {
   return run(async () => {
+    input = parse(purchaseSchema, input)
     const user = await requireShop(input.shopId)
-    if (!(input.qty > 0)) throw new ActionError("Qty must be more than 0")
     const isOwner = user.role === "owner"
     const paid = isOwner ? Math.max(0, input.paid) : 0
 
@@ -135,6 +140,7 @@ export async function createPurchase(input: PurchaseInput) {
 export async function getPurchases(shopId: ID) {
   return run(async () => {
     await requireOwner()
+    shopId = parse(idSchema, shopId)
     return db
       .select()
       .from(purchases)

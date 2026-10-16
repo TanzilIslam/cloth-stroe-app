@@ -14,7 +14,7 @@ import {
   sales,
 } from "@/db/schema"
 import { daysAgo, local, todayStart } from "@/db/time"
-import { ActionError, run } from "@/lib/action"
+import { ActionError, parse, run } from "@/lib/action"
 import { calcReorderQty, daysSince } from "@/lib/calc"
 import { requireOwner, requireShop, requireUser } from "@/lib/session"
 import type {
@@ -27,6 +27,12 @@ import type {
   NamedValue,
   PeakTimes,
 } from "@/types"
+import {
+  daysSchema,
+  idSchema,
+  monthsSchema,
+  shopIdsSchema,
+} from "@/types/validations"
 
 const sum = (expr: unknown) =>
   sql<number>`coalesce(sum(${expr}), 0)`.mapWith(Number)
@@ -36,7 +42,7 @@ const itemProfit = sql`(${saleItems.price} - ${saleItems.costSnapshot}) * ${sale
 /** Owner may pass several shops; staff only their own. */
 async function allowShops(shopIds: ID[]) {
   const user = await requireUser()
-  if (shopIds.length === 0) throw new ActionError("Pick a shop")
+  shopIds = parse(shopIdsSchema, shopIds)
   if (user.role !== "owner" && shopIds.some((id) => id !== user.shopId)) {
     throw new ActionError("Not your shop")
   }
@@ -89,6 +95,7 @@ export async function getDashboard(shopIds: ID[]) {
 export async function getComparison(shopIds: ID[]) {
   return run(async () => {
     await requireOwner()
+    shopIds = parse(shopIdsSchema, shopIds)
     const lastWeekStart = sql`(${todayStart} - interval '7 days')`
     const [row] = await db
       .select({
@@ -110,6 +117,8 @@ export async function getComparison(shopIds: ID[]) {
 export async function getBestsellers(shopIds: ID[], days = 30) {
   return run(async (): Promise<Bestsellers> => {
     await requireOwner()
+    shopIds = parse(shopIdsSchema, shopIds)
+    days = parse(daysSchema, days)
     const top = async (
       key:
         typeof products.name | typeof products.brand | typeof products.category
@@ -147,6 +156,8 @@ const hourLabel = (h: number) => `${h % 12 || 12}${h < 12 ? "a" : "p"}`
 export async function getPeakTimes(shopIds: ID[], days = 30) {
   return run(async (): Promise<PeakTimes> => {
     await requireOwner()
+    shopIds = parse(shopIdsSchema, shopIds)
+    days = parse(daysSchema, days)
     const where = and(
       inArray(sales.shopId, shopIds),
       gte(sales.createdAt, daysAgo(days))
@@ -186,6 +197,8 @@ export async function getPeakTimes(shopIds: ID[], days = 30) {
 export async function getMonthlyReport(shopIds: ID[], months = 6) {
   return run(async (): Promise<MonthRow[]> => {
     await requireOwner()
+    shopIds = parse(shopIdsSchema, shopIds)
+    months = parse(monthsSchema, months)
     const from = sql`(date_trunc('month', now() AT TIME ZONE 'Asia/Dhaka') - make_interval(months => ${months - 1})) AT TIME ZONE 'Asia/Dhaka'`
     const month = (col: unknown) =>
       sql<string>`to_char(${local(col)}, 'YYYY-MM')`
@@ -236,7 +249,7 @@ export async function getMonthlyReport(shopIds: ID[], months = 6) {
 
 export async function getLowStock(shopId: ID) {
   return run(async (): Promise<LowStockRow[]> => {
-    await requireShop(shopId)
+    await requireShop(parse(idSchema, shopId))
     const [prods, vars, sold] = await Promise.all([
       db
         .select()
@@ -292,7 +305,7 @@ export async function getLowStock(shopId: ID) {
 /** In stock but not sold for 60+ days. */
 export async function getDeadStock(shopId: ID) {
   return run(async (): Promise<DeadStockRow[]> => {
-    await requireShop(shopId)
+    await requireShop(parse(idSchema, shopId))
     const variantStock =
       sql<number>`(SELECT coalesce(sum(${productVariants.stockQty}), 0) FROM ${productVariants} WHERE ${productVariants.productId} = ${products.id})`.mapWith(
         Number

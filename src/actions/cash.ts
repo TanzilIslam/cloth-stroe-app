@@ -6,16 +6,17 @@ import { and, desc, eq, gte, lt, sql } from "drizzle-orm"
 import { db } from "@/db"
 import { cashCounts, expenses, payments, purchases, sales } from "@/db/schema"
 import { todayStart } from "@/db/time"
-import { run } from "@/lib/action"
+import { parse, run } from "@/lib/action"
 import { requireShop } from "@/lib/session"
 import type { CashSummary, ID } from "@/types"
+import { cashCountSchema, idSchema } from "@/types/validations"
 
 const total = (col: unknown) =>
   sql<number>`coalesce(sum(${col}), 0)`.mapWith(Number)
 
 export async function getExpectedCash(shopId: ID) {
   return run(async (): Promise<CashSummary> => {
-    await requireShop(shopId)
+    await requireShop(parse(idSchema, shopId))
     const [[s], [cin], [cout], [e], [p], [last]] = await Promise.all([
       db
         .select({ v: total(sales.paid) })
@@ -90,6 +91,7 @@ export async function saveCashCount(input: {
   counted: number
 }) {
   return run(async () => {
+    input = parse(cashCountSchema, input)
     const user = await requireShop(input.shopId)
     const [row] = await db
       .insert(cashCounts)
@@ -107,7 +109,7 @@ export async function saveCashCount(input: {
 
 export async function getCashCounts(shopId: ID) {
   return run(async () => {
-    await requireShop(shopId)
+    await requireShop(parse(idSchema, shopId))
     return db
       .select()
       .from(cashCounts)

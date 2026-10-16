@@ -5,7 +5,7 @@ import { asc, eq } from "drizzle-orm"
 
 import { db } from "@/db"
 import { shops, users } from "@/db/schema"
-import { ActionError, run } from "@/lib/action"
+import { ActionError, parse, run } from "@/lib/action"
 import {
   clearSession,
   getSession,
@@ -15,11 +15,12 @@ import {
   verifyPin,
 } from "@/lib/session"
 import type { SessionUser } from "@/types"
+import { idSchema, pinSchema } from "@/types/validations"
 
 /** Returns the user on success, null on a wrong PIN. */
 export async function login(pin: string) {
   return run(async (): Promise<SessionUser | null> => {
-    if (!/^\d{4}$/.test(pin)) return null
+    if (!pinSchema.safeParse(pin).success) return null
     // PIN is the only identifier, so check it against every user (few rows)
     const all = await db.select().from(users)
     for (const u of all) {
@@ -60,6 +61,7 @@ export async function getShops() {
 export async function switchShop(shopId: number) {
   return run(async () => {
     const user = await requireOwner()
+    shopId = parse(idSchema, shopId)
     const [shop] = await db.select().from(shops).where(eq(shops.id, shopId))
     if (!shop) throw new ActionError("Shop not found")
     const next = { ...user, shopId }

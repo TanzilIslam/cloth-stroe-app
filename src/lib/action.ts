@@ -3,6 +3,8 @@
 // unexpected errors still throw.
 import "server-only"
 
+import type { z } from "zod"
+
 import type { Result } from "./result"
 
 export type { Result }
@@ -17,4 +19,15 @@ export async function run<T>(fn: () => Promise<T>): Promise<Result<T>> {
     if (e instanceof ActionError) return { ok: false, error: e.message }
     throw e
   }
+}
+
+/** Validates input with a Zod schema; the first problem becomes an ActionError. */
+export function parse<T extends z.ZodType>(
+  schema: T,
+  value: unknown
+): z.output<T> {
+  const result = schema.safeParse(value)
+  if (!result.success)
+    throw new ActionError(result.error.issues[0]?.message ?? "Invalid input")
+  return result.data
 }

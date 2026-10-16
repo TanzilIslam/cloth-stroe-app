@@ -5,7 +5,7 @@ import { and, asc, eq, gt, min, sql, type AnyColumn } from "drizzle-orm"
 
 import { db } from "@/db"
 import { customers, payments, purchases, sales, suppliers } from "@/db/schema"
-import { ActionError, run } from "@/lib/action"
+import { ActionError, parse, run } from "@/lib/action"
 import type { Result } from "@/lib/result"
 import { requireOwner, requireShop } from "@/lib/session"
 import type {
@@ -17,6 +17,12 @@ import type {
   PaymentInput,
   Supplier,
 } from "@/types"
+import {
+  idSchema,
+  partySchema,
+  partyTypeSchema,
+  paymentSchema,
+} from "@/types/validations"
 
 export async function getParties(
   type: "customer",
@@ -28,7 +34,8 @@ export async function getParties(
 ): Promise<Result<Supplier[]>>
 export async function getParties(type: PartyType, shopId: ID) {
   return run(async () => {
-    await requireShop(shopId)
+    type = parse(partyTypeSchema, type)
+    await requireShop(parse(idSchema, shopId))
     const table = type === "customer" ? customers : suppliers
     return db
       .select()
@@ -48,10 +55,14 @@ export async function saveParty(
 ): Promise<Result<Supplier>>
 export async function saveParty(type: PartyType, input: PartyInput) {
   return run(async () => {
+    type = parse(partyTypeSchema, type)
+    input = parse(partySchema, input)
     await requireShop(input.shopId)
-    const name = input.name.trim()
-    if (!name) throw new ActionError("Name is required")
-    const values = { shopId: input.shopId, name, phone: input.phone.trim() }
+    const values = {
+      shopId: input.shopId,
+      name: input.name,
+      phone: input.phone,
+    }
     const table = type === "customer" ? customers : suppliers
     const [row] = await db.insert(table).values(values).returning()
     return row
@@ -62,6 +73,7 @@ export async function saveParty(type: PartyType, input: PartyInput) {
 export async function getDues(shopId: ID) {
   return run(async (): Promise<DueRow[]> => {
     await requireOwner()
+    shopId = parse(idSchema, shopId)
     const custRows = await db
       .select({ party: customers, since: min(sales.createdAt) })
       .from(customers)
@@ -108,9 +120,7 @@ export async function getDues(shopId: ID) {
 export async function recordPayment(input: PaymentInput) {
   return run(async () => {
     await requireOwner()
-    if (!(input.amount > 0)) throw new ActionError("Amount must be more than 0")
-    if (input.method !== "cash" && input.method !== "bKash")
-      throw new ActionError("Pick cash or bKash")
+    input = parse(paymentSchema, input)
 
     return db.transaction(async (tx) => {
       const where = (

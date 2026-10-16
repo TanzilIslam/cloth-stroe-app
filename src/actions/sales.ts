@@ -12,14 +12,20 @@ import {
   saleItems,
   sales,
 } from "@/db/schema"
-import { ActionError, run } from "@/lib/action"
+import { ActionError, parse, run } from "@/lib/action"
 import { requireShop } from "@/lib/session"
 import type { ID, SaleInput } from "@/types"
+import {
+  idSchema,
+  limitSchema,
+  saleSchema,
+  searchSchema,
+} from "@/types/validations"
 
 export async function searchProducts(shopId: ID, query: string) {
   return run(async () => {
-    const user = await requireShop(shopId)
-    const q = query.trim()
+    const user = await requireShop(parse(idSchema, shopId))
+    const q = parse(searchSchema, query).trim()
     if (!q) return []
     const like = `%${q}%`
     const rows = await db
@@ -45,7 +51,8 @@ export async function searchProducts(shopId: ID, query: string) {
 /** Most recently sold products first, then the rest. */
 export async function getRecentProducts(shopId: ID, limit = 12) {
   return run(async () => {
-    const user = await requireShop(shopId)
+    const user = await requireShop(parse(idSchema, shopId))
+    limit = parse(limitSchema, limit)
     const lastSold = sql`(SELECT max(${saleItems.id}) FROM ${saleItems} WHERE ${saleItems.productId} = ${products.id})`
     const rows = await db
       .select()
@@ -57,13 +64,10 @@ export async function getRecentProducts(shopId: ID, limit = 12) {
   })
 }
 
-export async function createSale(input: SaleInput) {
+export async function createSale(raw: SaleInput) {
   return run(async () => {
+    const input = parse(saleSchema, raw)
     const user = await requireShop(input.shopId)
-    if (input.items.length === 0) throw new ActionError("Cart is empty")
-    if (input.items.some((i) => !i.qty || i.price < 0))
-      throw new ActionError("Invalid item")
-    if (input.discount < 0) throw new ActionError("Invalid discount")
 
     const total = input.items.reduce((s, i) => s + i.qty * i.price, 0)
     const net = total - input.discount
@@ -167,7 +171,7 @@ export async function createSale(input: SaleInput) {
 
 export async function getSales(shopId: ID) {
   return run(async () => {
-    await requireShop(shopId)
+    await requireShop(parse(idSchema, shopId))
     return db
       .select()
       .from(sales)

@@ -36,4 +36,3 @@ Next.js app for the men's and women's shops: sales, stock and hisab.
 - No PIN attempt limit yet (4-digit PINs can be guessed).
 - Login checks the PIN against every user's hash (fine for a few users).
 - Session keeps role and shop until logout; a role change needs a re-login.
-- Zod schemas are not added yet; actions validate by hand.
