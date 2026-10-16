@@ -7,6 +7,12 @@ import { db } from "@/db"
 import { shops, users } from "@/db/schema"
 import { ActionError, parse, run } from "@/lib/action"
 import {
+  assertNotLocked,
+  clearFailures,
+  clientIp,
+  recordFailure,
+} from "@/lib/login-limit"
+import {
   clearSession,
   currentUser,
   requireOwner,
@@ -17,10 +23,18 @@ import {
 import type { SessionUser } from "@/types"
 import { idSchema, pinSchema } from "@/types/validations"
 
-/** Returns the user on success, null on a wrong PIN. */
+/**
+ * Returns the user on success, null on a wrong PIN.
+ * Fails with a message when the device is locked (too many wrong PINs).
+ */
 export async function login(pin: string) {
   return run(async (): Promise<SessionUser | null> => {
-    if (!pinSchema.safeParse(pin).success) return null
+    const ip = await clientIp()
+    await assertNotLocked(ip)
+    if (!pinSchema.safeParse(pin).success) {
+      await recordFailure(ip)
+      return null
+    }
     // PIN is the only identifier, so check it against every user (few rows)
     const all = await db.select().from(users).where(eq(users.active, true))
     for (const u of all) {
@@ -32,9 +46,11 @@ export async function login(pin: string) {
           shopId: u.shopId,
         }
         await setSession(user)
+        await clearFailures(ip)
         return user
       }
     }
+    await recordFailure(ip)
     return null
   })
 }

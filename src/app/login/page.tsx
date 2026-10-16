@@ -22,9 +22,14 @@ export default function LoginPage() {
   }, [user, router])
 
   async function handleSubmit(pin: string) {
-    const loggedIn = await login(pin)
-    if (loggedIn) setSessionUser(loggedIn)
-    return !!loggedIn
+    try {
+      const loggedIn = await login(pin)
+      if (!loggedIn) return "Wrong PIN, try again"
+      setSessionUser(loggedIn)
+      return null
+    } catch (e) {
+      return (e as Error).message // e.g. too many wrong PINs
+    }
   }
 
   return (

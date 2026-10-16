@@ -217,3 +217,11 @@ export const cashCounts = pgTable(
   },
   (t) => [index().on(t.shopId, t.date)]
 )
+
+/** Failed PIN tries per device (IP). 5 fails in 15 min → locked 15 min. */
+export const loginAttempts = pgTable("login_attempts", {
+  ip: text().primaryKey(),
+  failures: integer().notNull().default(0),
+  firstAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+  lockedUntil: timestamp({ withTimezone: true }),
+})

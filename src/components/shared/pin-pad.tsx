@@ -10,28 +10,28 @@ import { applyNumpadKey, Numpad, type NumpadKey } from "./numpad"
 const PIN_LENGTH = 4
 
 interface PinPadProps {
-  /** Resolve true on success; false clears the PIN and shows an error. */
-  onSubmit: (pin: string) => Promise<boolean>
+  /** Resolve null on success, or an error message (clears the PIN). */
+  onSubmit: (pin: string) => Promise<string | null>
 }
 
 export function PinPad({ onSubmit }: PinPadProps) {
   const [pin, setPin] = useState("")
-  const [error, setError] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [pending, setPending] = useState(false)
 
   async function handleKey(key: NumpadKey) {
     if (key === ".") return
     const next = applyNumpadKey(pin, key, PIN_LENGTH)
     setPin(next)
-    setError(false)
+    setError(null)
     if (next.length < PIN_LENGTH) return
 
     setPending(true)
-    const ok = await onSubmit(next)
+    const message = await onSubmit(next)
     setPending(false)
-    if (!ok) {
+    if (message) {
       setPin("")
-      setError(true)
+      setError(message)
     }
   }
 
@@ -52,8 +52,8 @@ export function PinPad({ onSubmit }: PinPadProps) {
           />
         ))}
       </div>
-      <p className="h-5 text-sm text-destructive" role="alert">
-        {error && "Wrong PIN, try again"}
+      <p className="min-h-5 text-center text-sm text-destructive" role="alert">
+        {error}
       </p>
       <Numpad onKey={handleKey} disabled={pending} className="w-full" />
     </div>

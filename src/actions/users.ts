@@ -2,10 +2,10 @@
 
 // Owner only: staff accounts on /setup. PINs are unique because the PIN alone
 // identifies the user at login.
-import { and, asc, count, eq, ne } from "drizzle-orm"
+import { and, asc, count, eq, gt, ne } from "drizzle-orm"
 
 import { db } from "@/db"
-import { users } from "@/db/schema"
+import { loginAttempts, users } from "@/db/schema"
 import { ActionError, parse, run } from "@/lib/action"
 import { hashPin, requireOwner, verifyPin } from "@/lib/session"
 import type { ID, UserInput, UserRow } from "@/types"
@@ -109,5 +109,24 @@ export async function setUserActive(id: ID, active: boolean) {
       .returning(columns)
     if (!row) throw new ActionError("User not found")
     return row
+  })
+}
+
+/** Devices locked right now after too many wrong PINs. */
+export async function getLoginLocks() {
+  return run(async () => {
+    await requireOwner()
+    return db
+      .select({ ip: loginAttempts.ip, lockedUntil: loginAttempts.lockedUntil })
+      .from(loginAttempts)
+      .where(gt(loginAttempts.lockedUntil, new Date()))
+  })
+}
+
+/** Owner unlock: clears the count for one device. */
+export async function unlockLogin(ip: string) {
+  return run(async () => {
+    await requireOwner()
+    await db.delete(loginAttempts).where(eq(loginAttempts.ip, String(ip)))
   })
 }

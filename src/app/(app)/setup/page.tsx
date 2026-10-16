@@ -23,16 +23,19 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   createUser,
+  getLoginLocks,
   getParties,
   getUsers,
   saveParty,
   setUserActive,
+  unlockLogin,
   updateParty,
   updateUser,
 } from "@/api"
 import { useQuery } from "@/hooks/use-query"
 import { useSession } from "@/hooks/use-session"
 import { useShops } from "@/hooks/use-shops"
+import { formatTime } from "@/lib/utils"
 import type { Customer, ID, PartyType, Supplier, UserRow } from "@/types"
 
 type Editing =
@@ -47,6 +50,7 @@ export default function SetupPage() {
   const shopName = shops.find((s) => s.id === shopId)?.name ?? ""
 
   const users = useQuery(getUsers, [])
+  const locks = useQuery(getLoginLocks, [])
   const customers = useQuery(() => getParties("customer", shopId), [shopId])
   const suppliers = useQuery(() => getParties("supplier", shopId), [shopId])
   const status = queryStatus(users, customers, suppliers)
@@ -108,6 +112,37 @@ export default function SetupPage() {
           >
             <Plus /> Add user
           </Button>
+          {(locks.data ?? []).length > 0 && (
+            <section className="rounded-lg border border-destructive/30 bg-destructive/5 p-3">
+              <h3 className="mb-2 text-sm font-medium">
+                Locked devices (too many wrong PINs)
+              </h3>
+              <ul className="flex flex-col gap-2 text-sm">
+                {(locks.data ?? []).map((l) => (
+                  <li
+                    key={l.ip}
+                    className="flex items-center justify-between gap-3"
+                  >
+                    <span>
+                      {l.ip} · until{" "}
+                      {l.lockedUntil && formatTime(l.lockedUntil)}
+                    </span>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={async () => {
+                        await unlockLogin(l.ip)
+                        toast.success("Unlocked")
+                        locks.reload()
+                      }}
+                    >
+                      Unlock
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
           {users.loading ? (
             <Loading />
           ) : (

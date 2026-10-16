@@ -32,6 +32,9 @@ Next.js app for the men's and women's shops: sales, stock and hisab.
 
 **Vercel:** add the same two env vars in Project Settings → Environment Variables. Run `pnpm db:migrate` from your PC before deploying a schema change.
 
+## Login Safety
+- 5 wrong PINs within 15 min lock that device (IP) for 15 min. The owner can unlock it on **Setup → Staff**.
+- Staff on the same shop Wi-Fi share one IP, so one person's mistakes can lock the others.
+
 ## Known Issues (fix later)
-- No PIN attempt limit yet (4-digit PINs can be guessed).
 - Login checks the PIN against every user's hash (fine for a few users).
