@@ -122,7 +122,11 @@ export async function saveVariant(input: VariantInput) {
     if (!product?.hasVariants) throw new ActionError("Product has no variants")
     const [row] = await db
       .insert(productVariants)
-      .values({ productId: input.productId, ...fields })
+      .values({
+        productId: input.productId,
+        ...fields,
+        stockQty: input.openingStock ?? 0,
+      })
       .returning()
     return row
   })

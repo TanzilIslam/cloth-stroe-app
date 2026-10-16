@@ -190,9 +190,15 @@ export default function StockPage() {
           {editProduct?.hasVariants && (
             <VariantForm
               variants={editProduct.variants}
-              onAdd={async (size, color) => {
-                await saveVariant({ productId: editProduct.id, size, color })
+              onAdd={async (size, color, openingStock) => {
+                await saveVariant({
+                  productId: editProduct.id,
+                  size,
+                  color,
+                  openingStock,
+                })
                 products.reload()
+                lowStock.reload()
               }}
               onDelete={async (id) => {
                 await deleteVariant(id)

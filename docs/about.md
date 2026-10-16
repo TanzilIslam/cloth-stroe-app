@@ -88,3 +88,4 @@ The **Expense** button (bottom nav / sidebar) opens a sheet with two tabs: add e
 - Staff are deactivated, never deleted, so their past sales stay.
 - Staff count cash from the Expense sheet (no 4th nav button).
 - Owner can add staff and owners; at least one active owner is always kept.
+- Moving into the app: products have opening stock, new variants have opening stock, and new customers / suppliers have an opening balance (owner only). None of these create fake sales or purchases; opening dues show as "opening balance" in Hisab.

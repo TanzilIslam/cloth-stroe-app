@@ -57,14 +57,26 @@ export async function saveParty(type: PartyType, input: PartyInput) {
   return run(async () => {
     type = parse(partyTypeSchema, type)
     input = parse(partySchema, input)
-    await requireShop(input.shopId)
+    const user = await requireShop(input.shopId)
+    // Opening balance: owner only, when moving existing dues into the app
+    const opening = input.openingBalance ?? 0
+    if (opening > 0 && user.role !== "owner")
+      throw new ActionError("Owner only")
     const values = {
       shopId: input.shopId,
       name: input.name,
       phone: input.phone,
     }
-    const table = type === "customer" ? customers : suppliers
-    const [row] = await db.insert(table).values(values).returning()
+    const [row] =
+      type === "customer"
+        ? await db
+            .insert(customers)
+            .values({ ...values, dueBalance: opening })
+            .returning()
+        : await db
+            .insert(suppliers)
+            .values({ ...values, payableBalance: opening })
+            .returning()
     return row
   })
 }

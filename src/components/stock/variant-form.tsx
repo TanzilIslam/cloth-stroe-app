@@ -1,6 +1,7 @@
 "use client"
 
-// Size / color variants for ready-made dresses. Stock comes from stock in.
+// Size / color variants for ready-made dresses. Opening stock on add;
+// later stock comes from stock in.
 import { Trash2 } from "lucide-react"
 import { useState } from "react"
 
@@ -10,21 +11,27 @@ import type { ProductVariant } from "@/types"
 
 interface VariantFormProps {
   variants: ProductVariant[]
-  onAdd: (size: string | null, color: string | null) => Promise<void>
+  onAdd: (
+    size: string | null,
+    color: string | null,
+    openingStock: number
+  ) => Promise<void>
   onDelete: (id: number) => Promise<void>
 }
 
 export function VariantForm({ variants, onAdd, onDelete }: VariantFormProps) {
   const [size, setSize] = useState("")
   const [color, setColor] = useState("")
+  const [stock, setStock] = useState("")
   const [error, setError] = useState<string | null>(null)
 
   async function add(e: React.FormEvent) {
     e.preventDefault()
     if (!size.trim() && !color.trim()) return
-    await onAdd(size.trim() || null, color.trim() || null)
+    await onAdd(size.trim() || null, color.trim() || null, Number(stock || 0))
     setSize("")
     setColor("")
+    setStock("")
   }
 
   async function remove(id: number) {
@@ -77,6 +84,16 @@ export function VariantForm({ variants, onAdd, onDelete }: VariantFormProps) {
           placeholder="Color"
           value={color}
           onChange={(e) => setColor(e.target.value)}
+        />
+        <Input
+          type="number"
+          inputMode="decimal"
+          min={0}
+          placeholder="Stock"
+          aria-label="Opening stock"
+          className="w-24"
+          value={stock}
+          onChange={(e) => setStock(e.target.value)}
         />
         <Button type="submit" variant="outline">
           Add

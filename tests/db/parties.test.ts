@@ -137,3 +137,31 @@ describe("customers and suppliers", () => {
     expect("payableBalance" in s && s.payableBalance).toBe(15000)
   })
 })
+
+describe("opening balances", () => {
+  it("owner can add a customer and supplier with what is already owed", async () => {
+    await loginAs(PIN.owner)
+    const c = ok(await saveParty("customer", { shopId: 1, name: "Old Customer", phone: "", openingBalance: 3200 }))
+    expect(c.dueBalance).toBe(3200)
+    const s = ok(await saveParty("supplier", { shopId: 1, name: "Old Supplier", phone: "", openingBalance: 12000 }))
+    expect(s.payableBalance).toBe(12000)
+
+    const dues = ok(await getDues(1))
+    const row = dues.find((d) => d.party.name === "Old Customer")
+    expect(row).toMatchObject({ amount: 3200, since: null }) // shown as "opening balance"
+  })
+
+  it("staff can't set an opening balance", async () => {
+    await loginAs(PIN.rahim)
+    expect(
+      err(await saveParty("customer", { shopId: 1, name: "X", phone: "", openingBalance: 100 }))
+    ).toBe("Owner only")
+  })
+
+  it("rejects a negative opening balance", async () => {
+    await loginAs(PIN.owner)
+    expect(
+      err(await saveParty("customer", { shopId: 1, name: "X", phone: "", openingBalance: -1 }))
+    ).toBe("Opening balance can't be negative")
+  })
+})

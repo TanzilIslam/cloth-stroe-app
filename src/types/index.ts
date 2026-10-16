@@ -174,6 +174,8 @@ export interface PartyInput {
   shopId: ID
   name: string
   phone: string
+  /** Owner, on create only: what they already owe / we already owe. */
+  openingBalance?: Money
 }
 
 export type ProductInput = Omit<Product, "id" | "active">
@@ -183,6 +185,8 @@ export interface VariantInput {
   productId: ID
   size: string | null
   color: string | null
+  /** On create only: stock already in the shop (not a purchase). */
+  openingStock?: number
 }
 
 export interface PurchaseInput {

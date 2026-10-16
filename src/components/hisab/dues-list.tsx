@@ -43,7 +43,9 @@ export function DuesList({ rows, shopName, onSettle }: DuesListProps) {
               </p>
               <p className="text-xs text-muted-foreground">
                 {row.party.phone}
-                {row.since && ` · ${daysSince(row.since)} days`}
+                {row.since
+                  ? ` · ${daysSince(row.since)} days`
+                  : " · opening balance"}
               </p>
             </div>
             <Money amount={row.amount} className="font-semibold" />

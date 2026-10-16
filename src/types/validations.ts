@@ -96,6 +96,7 @@ export const variantSchema = z
     productId: idSchema,
     size: optionalText(20),
     color: optionalText(30),
+    openingStock: nonNegative("Opening stock").optional(),
   })
   .refine(
     (v) => v.size || v.color,
@@ -126,6 +127,7 @@ export const partySchema = z.object({
     .trim()
     .max(20, "Phone is too long")
     .regex(/^[0-9+\- ]*$/, "Phone: digits only"),
+  openingBalance: nonNegative("Opening balance").optional(),
 }) satisfies z.ZodType<PartyInput>
 
 export const paymentSchema = z.object({

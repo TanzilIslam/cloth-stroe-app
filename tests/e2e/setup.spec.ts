@@ -117,3 +117,21 @@ test("customers: add one (name is trimmed)", async ({ page }) => {
     page.getByRole("tabpanel").getByRole("row").filter({ hasText: "Habib" })
   ).toContainText("01712345678")
 })
+
+test("opening balance on a new customer shows in Hisab dues", async ({ page }) => {
+  await page.getByRole("tab", { name: "Customers" }).click()
+  await page.getByRole("button", { name: "Add customer" }).click()
+  await dialog(page).getByLabel("Name").fill("Old Customer")
+  await dialog(page).getByLabel("Already owes us ৳").fill("3200")
+  await dialog(page).getByRole("button", { name: "Add customer" }).click()
+  await expectToast(page, "Customer added")
+
+  await page.getByRole("tabpanel").getByRole("row").filter({ hasText: "Old Customer" }).click()
+  await expect(dialog(page).getByLabel("Already owes us ৳")).toHaveCount(0) // not on edit
+  await page.keyboard.press("Escape")
+
+  await page.getByRole("link", { name: "Hisab" }).click()
+  const row = page.getByRole("tabpanel").getByRole("listitem").filter({ hasText: "Old Customer" })
+  await expect(row).toContainText("opening balance")
+  await expect(row).toContainText("৳3,200")
+})

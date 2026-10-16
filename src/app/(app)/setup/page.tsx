@@ -7,7 +7,7 @@ import { useState } from "react"
 import { toast } from "sonner"
 
 import { PageHeader } from "@/components/layout/page-header"
-import { PartyForm } from "@/components/setup/party-form"
+import { PartyForm, type PartyValues } from "@/components/setup/party-form"
 import { UserForm } from "@/components/setup/user-form"
 import { DataTable } from "@/components/shared/data-table"
 import { LoadError, Loading, queryStatus } from "@/components/shared/load-state"
@@ -61,7 +61,7 @@ export default function SetupPage() {
   async function savePartyForm(
     type: PartyType,
     id: ID | undefined,
-    values: { name: string; phone: string }
+    values: PartyValues
   ) {
     const input = { shopId, ...values }
     if (id) await updateParty(type, id, input)
@@ -262,6 +262,13 @@ export default function SetupPage() {
             <PartyForm
               key={editing.row?.id ?? "new"}
               party={editing.row}
+              openingLabel={
+                editing.row
+                  ? undefined
+                  : editing.kind === "customer"
+                    ? "Already owes us ৳"
+                    : "We already owe them ৳"
+              }
               submitLabel={editing.row ? "Save changes" : `Add ${editing.kind}`}
               onSubmit={(values) =>
                 savePartyForm(editing.kind, editing.row?.id, values)
