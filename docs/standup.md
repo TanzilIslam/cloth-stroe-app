@@ -17,8 +17,13 @@
 - Sales history by day, stock-in history, staff cash count in the Expense sheet.
 - PIN attempt limit: 5 wrong in 15 min locks the device for 15 min; owner unlock.
 
+**Tests (written, not run yet)**
+- Vitest unit (4 files), Vitest DB tests for Server Actions (6 files), Playwright E2E (6 specs).
+- Run on PC after setting `TEST_DATABASE_URL`: `pnpm test`, `pnpm test:db`, `pnpm test:e2e`.
+
 **Next**
 - Go-live: Neon on PC (`pnpm db:migrate`, `pnpm db:seed`), Vercel env vars + deploy, clean production seed.
+- Run the test suites on PC and fix anything that fails.
 - Later: Bangla UI, automated tests in the repo, offline mode.
 
 ## 2026-10-12

@@ -22,6 +22,10 @@ Next.js app for the men's and women's shops: sales, stock and hisab.
 | `pnpm db:migrate` | Apply migrations to `DATABASE_URL` |
 | `pnpm db:seed` | Wipe + load demo data (PINs: owner `1111`, staff `2222` / `3333`) |
 | `pnpm db:studio` | Browse the database |
+| `pnpm test` | Unit tests (no database) |
+| `pnpm test:db` | Server Action tests against the test database |
+| `pnpm test:e2e` | Browser tests (builds + starts the app on port 3100) |
+| `pnpm test:all` | All three |
 
 ## Backend Setup (local PC)
 1. Create a Neon database and copy the **pooled** connection string (host has `-pooler`).
@@ -31,6 +35,20 @@ Next.js app for the men's and women's shops: sales, stock and hisab.
 5. `pnpm dev`, open http://localhost:3000 and log in with `1111`.
 
 **Vercel:** add the same two env vars in Project Settings → Environment Variables. Run `pnpm db:migrate` from your PC before deploying a schema change.
+
+## Testing
+| Suite | Folder | Covers |
+|---|---|---|
+| Unit (Vitest) | `tests/unit` | Reorder math, Zod schemas, Taka / date formatting, result helpers |
+| DB (Vitest) | `tests/db` | Sales + stock + due, rollback, returns, stock in + supplier balance, payments, dues, owner vs staff access, cost hiding, login + PIN lock, reports |
+| E2E (Playwright) | `tests/e2e` | Login + guards + PIN lock, POS, stock, hisab + dashboard, setup, history |
+
+**One-time setup**
+1. Create a separate database whose name contains `test`, e.g. local `shop_test` or a Neon branch. Tests **wipe it**.
+2. `cp .env.test.example .env.test` and set `TEST_DATABASE_URL`.
+3. `pnpm exec playwright install chromium`
+
+Each DB and E2E test file migrates and re-seeds the test database first, so files don't depend on each other.
 
 ## Login Safety
 - 5 wrong PINs within 15 min lock that device (IP) for 15 min. The owner can unlock it on **Setup → Staff**.
