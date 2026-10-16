@@ -106,3 +106,53 @@ When the backend is ready, mock calls are swapped for Server Actions without cha
 - [x] Stock → History tab (stock-in history; cost hidden from staff)
 - [x] Expense sheet → Count cash tab (staff cash count)
 - [x] Mock layer replaced by real Server Actions (`src/api/`)
+
+---
+
+## Improvements (later)
+Found in a review after the backend was done. Nothing is broken; these make the code more consistent and the UI safer. Suggested order: 1 → 5.
+
+### 1. Reusable building blocks
+- [ ] **`ROUTES` constant** (`src/lib/routes.ts`): one place for `"/"`, `"/login"`, `"/sell"`, `"/sell/history"`, `"/stock"`, `"/hisab"`, `"/setup"`. Use it in nav items, redirects, links, `proxy.ts` and `OWNER_ONLY`.
+- [ ] **Shop time zone constant:** `"Asia/Dhaka"` is written in `src/lib/utils.ts`, `src/db/time.ts` and `comparison-card.tsx`. Export one `SHOP_TZ` and use it everywhere (SQL included).
+- [ ] **Payment method labels:** "Cash" / "bKash" / "Due" are repeated in the pay dialog, payment form and sale list. Add `PAYMENT_LABELS` next to the enums in `src/types`.
+- [ ] **Form field style:** the `flex flex-col gap-1.5 text-sm font-medium` label class is copied in several forms. Make a small `Field` component in `components/shared/` and use it in every form.
+- [ ] **Remove unused shadcn `label`** (`src/components/ui/label.tsx`): no file imports it.
+
+**Outcome:** URLs, time zone and labels change in one place only.
+
+### 2. Shared Zod on the client
+- [ ] Forms (product, stock in, party, user, payment, expense, cash count) use their own `valid` checks. Validate with the same schemas from `src/types/validations.ts` before calling the action, and show the first error under the form.
+- [ ] Keep the server check as is (never trust the client).
+
+**Outcome:** a rule (e.g. "sell price must be more than 0") is written once and gives the same message in the form and on the server.
+
+### 3. `useAction` hook: pending + toast in one place
+- [ ] **Hook** (`src/hooks/use-action.ts`): wraps any `src/api` call and returns `{ run, pending }`. On success it shows an optional success toast; on error it shows the error message as a toast (or returns it for inline display).
+- [ ] **Use it for every mutation**, replacing the hand-written `pending` / `error` / `try-catch` in each form and page.
+- [ ] **Fix one-click actions with no pending state or error handling:** deactivate / activate product, delete expense, add / delete variant, deactivate user, unlock device, shop switch. Today a failure there is silent, and a double tap can fire twice.
+- [ ] **Add missing feedback toasts:** shop switch ("Now in Women's Shop"), variant added / deleted, expense deleted, product activated / deactivated.
+
+**Outcome:** every action disables its button while running and always ends with a clear message, success or error.
+
+### 4. Loaders on every data load
+- [ ] Shared `Loading` skeleton (already in `components/shared/load-state.tsx`) on the tabs that show nothing while loading: Stock → Alerts, Hisab → Expenses, Cash, Report, and the expense sheet's Today list and Count cash tab.
+- [ ] Pay dialog: show a small loader while customers load.
+- [ ] Every query also shows `LoadError` with "Try again" on failure (some tabs only check the first query).
+
+**Outcome:** no blank areas; the user always sees loading, data, empty or error.
+
+### 5. `ConfirmDialog` for delete and important actions
+- [ ] **Component** (`components/shared/confirm-dialog.tsx`): title, message, confirm label, red "danger" style for destructive actions, pending state while the action runs. Easy to call, e.g. `confirm({ title, message, danger: true })` returning a promise, or a `<ConfirmDialog>` wrapper around the trigger button.
+- [ ] **Use it on:**
+  - delete expense
+  - delete variant
+  - deactivate product
+  - deactivate user
+  - unlock device
+  - save cash count when there's a difference ("Cash is short ৳X. Save anyway?")
+  - refund in return mode
+  - receive / pay a payment of more than ৳10,000
+- [ ] Use the danger style (red confirm button) for the deletes and deactivations.
+
+**Outcome:** no destructive or money-moving action happens from a single accidental tap.
