@@ -74,7 +74,7 @@ export function CashCountForm({ summary, onSubmit }: CashCountFormProps) {
           type="number"
           inputMode="decimal"
           min={0}
-          className="h-12 w-32 text-right text-lg"
+          className="w-32 text-right"
           value={counted}
           onChange={(e) => setCounted(e.target.value)}
         />
@@ -96,7 +96,7 @@ export function CashCountForm({ summary, onSubmit }: CashCountFormProps) {
           {diff !== 0 && <Money amount={Math.abs(diff)} />}
         </p>
       )}
-      <Button type="submit" size="lg" disabled={counted === "" || pending}>
+      <Button type="submit" disabled={counted === "" || pending}>
         {pending ? "Saving…" : "Save cash count"}
       </Button>
     </form>

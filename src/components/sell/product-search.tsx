@@ -23,7 +23,7 @@ export function ProductSearch({
         type="search"
         inputMode="search"
         placeholder="Search name or barcode"
-        className="h-12 pr-10 pl-10 text-base"
+        className="pr-10 pl-10"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={(e) => e.key === "Enter" && onSubmit?.()}

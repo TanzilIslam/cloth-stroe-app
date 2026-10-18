@@ -49,7 +49,6 @@ export function PaymentForm({ row, onSubmit }: PaymentFormProps) {
           inputMode="decimal"
           min={0}
           max={row.amount}
-          className="h-12 text-lg"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
         />
@@ -71,7 +70,7 @@ export function PaymentForm({ row, onSubmit }: PaymentFormProps) {
           {error}
         </p>
       )}
-      <Button type="submit" size="lg" disabled={!valid || pending}>
+      <Button type="submit" disabled={!valid || pending}>
         {pending
           ? "Saving…"
           : row.partyType === "customer"

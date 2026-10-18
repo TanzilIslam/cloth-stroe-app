@@ -108,7 +108,7 @@ export function Cart({ cart, onPay }: CartProps) {
         </div>
       </div>
 
-      <Button size="lg" className="h-14 text-lg" onClick={onPay}>
+      <Button onClick={onPay}>
         {cart.total < 0 ? "Refund" : "Pay"}{" "}
         <Money amount={Math.abs(cart.total)} />
       </Button>

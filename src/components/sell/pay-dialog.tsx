@@ -126,7 +126,6 @@ function PayForm({
               <Button
                 key={m.value}
                 variant={method === m.value ? "default" : "outline"}
-                className="h-12"
                 onClick={() => setMethod(m.value)}
               >
                 {m.label}
@@ -221,8 +220,6 @@ function PayForm({
       )}
 
       <Button
-        size="lg"
-        className="h-14 text-lg"
         disabled={pending || needsCustomer || !!newCustomer}
         onClick={confirm}
       >

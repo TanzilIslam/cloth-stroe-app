@@ -55,6 +55,8 @@ test("stock-in history: owner sees total and paid, staff don't", async ({
   await page.getByRole("combobox", { name: "Product" }).click()
   await page.getByRole("option", { name: "Pant Fabric Grey" }).click()
   await dialog(page).getByLabel(/Qty/).fill("12")
+  // The last cost fills in after the product is picked; wait so the total is 3,600
+  await expect(dialog(page).getByLabel(/Cost/)).toHaveValue("300")
   await dialog(page).getByLabel("Paid now ৳").fill("2000")
   await dialog(page).getByRole("button", { name: "Save stock in" }).click()
   await expectToast(page, "Stock added")

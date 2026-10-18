@@ -4,7 +4,7 @@ import { defineConfig, devices } from "@playwright/test"
 
 import { TEST_SESSION_SECRET, testDatabaseUrl } from "./tests/test-env"
 
-const PORT = 3100
+const PORT = Number(process.env.E2E_PORT ?? 3100) // E2E_PORT if 3100 is busy
 const DATABASE_URL = testDatabaseUrl()
 
 export default defineConfig({

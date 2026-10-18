@@ -111,7 +111,7 @@ describe("createSale (staff, men's shop)", () => {
           { productId: 1, variantId: null, qty: 1, price: 900 },
           { productId: 6, variantId: null, qty: 999, price: 400 },
         ],
-        paid: 400_000,
+        paid: 400_500, // 900 + 999 × 400, so no due and the stock check is what fails
       })
     )
     expect(err(result)).toBe("Not enough stock")

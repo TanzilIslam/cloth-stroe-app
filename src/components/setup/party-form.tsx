@@ -91,7 +91,7 @@ export function PartyForm({
           {error}
         </p>
       )}
-      <Button type="submit" size="lg" disabled={!name.trim() || pending}>
+      <Button type="submit" disabled={!name.trim() || pending}>
         {pending ? "Saving…" : submitLabel}
       </Button>
     </form>
