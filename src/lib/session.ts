@@ -1,0 +1,105 @@
+// Server session: encrypted cookie (iron-session) holding the logged-in user.
+// Every Server Action calls requireUser / requireOwner / requireShop first.
+import "server-only"
+
+import bcrypt from "bcryptjs"
+import { sealData, unsealData } from "iron-session"
+import { eq } from "drizzle-orm"
+import { cookies } from "next/headers"
+
+import { db } from "@/db"
+import { users } from "@/db/schema"
+
+import type { ID, SessionUser } from "@/types"
+
+import { ActionError } from "./action"
+import { SESSION_COOKIE } from "./config"
+import { env } from "./env"
+import { ERRORS } from "./errors"
+
+const COOKIE = SESSION_COOKIE
+const MAX_AGE = 60 * 60 * 24 * 30 // 30 days
+
+function secret() {
+  return env().SESSION_SECRET
+}
+
+export async function getSession(): Promise<SessionUser | null> {
+  const cookie = (await cookies()).get(COOKIE)?.value
+  if (!cookie) return null
+  try {
+    const user = await unsealData<Partial<SessionUser>>(cookie, {
+      password: secret(),
+      ttl: MAX_AGE,
+    })
+    return user.id ? (user as SessionUser) : null
+  } catch {
+    return null
+  }
+}
+
+export async function setSession(user: SessionUser) {
+  const sealed = await sealData(user, { password: secret(), ttl: MAX_AGE })
+  ;(await cookies()).set(COOKIE, sealed, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: MAX_AGE,
+  })
+}
+
+export async function clearSession() {
+  ;(await cookies()).delete(COOKIE)
+}
+
+/**
+ * Session user re-checked against the database on every call, so a
+ * deactivated user is logged out and role / name changes apply at once.
+ * The owner keeps the shop they switched to; staff always get their own shop.
+ */
+export async function currentUser(): Promise<SessionUser | null> {
+  const session = await getSession()
+  if (!session) return null
+  const [u] = await db
+    .select({
+      name: users.name,
+      role: users.role,
+      shopId: users.shopId,
+      active: users.active,
+    })
+    .from(users)
+    .where(eq(users.id, session.id))
+  if (!u?.active) return null
+  return {
+    id: session.id,
+    name: u.name,
+    role: u.role,
+    shopId: u.role === "owner" ? session.shopId : u.shopId,
+  }
+}
+
+export async function requireUser(): Promise<SessionUser> {
+  const user = await currentUser()
+  if (!user) throw new ActionError(ERRORS.loginAgain)
+  return user
+}
+
+export async function requireOwner(): Promise<SessionUser> {
+  const user = await requireUser()
+  if (user.role !== "owner") throw new ActionError(ERRORS.ownerOnly)
+  return user
+}
+
+/** Staff can only touch their own shop; the owner can touch any shop. */
+export async function requireShop(shopId: ID): Promise<SessionUser> {
+  const user = await requireUser()
+  if (user.role !== "owner" && user.shopId !== shopId) {
+    throw new ActionError(ERRORS.notYourShop)
+  }
+  return user
+}
+
+export const hashPin = (pin: string) => bcrypt.hash(pin, 10)
+export const verifyPin = (pin: string, hash: string) =>
+  bcrypt.compare(pin, hash)
