@@ -183,12 +183,7 @@ export function ProductForm({
           {error}
         </p>
       )}
-      <Button
-        type="submit"
-        size="lg"
-        className="col-span-2"
-        disabled={!valid || pending}
-      >
+      <Button type="submit" className="col-span-2" disabled={!valid || pending}>
         {pending ? "Saving…" : isNew ? "Add product" : "Save changes"}
       </Button>
     </form>

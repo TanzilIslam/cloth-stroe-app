@@ -44,9 +44,9 @@ export function StockInForm({
   )
   const [qty, setQty] = useState(initial?.qty ? String(initial.qty) : "")
   const [cost, setCost] = useState("")
-  const [supplierId, setSupplierId] = useState<ID | null>(
-    suppliers[0]?.id ?? null
-  )
+  // First supplier until one is picked (the list may load after the form opens)
+  const [pickedSupplierId, setSupplierId] = useState<ID | null>(null)
+  const supplierId = pickedSupplierId ?? suppliers[0]?.id ?? null
   const [paid, setPaid] = useState("")
   const [pending, setPending] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -146,7 +146,6 @@ export function StockInForm({
             inputMode="decimal"
             min={0}
             step="any"
-            className="h-12 text-lg"
             value={qty}
             onChange={(e) => setQty(e.target.value)}
           />
@@ -158,7 +157,6 @@ export function StockInForm({
               type="number"
               inputMode="decimal"
               min={0}
-              className="h-12 text-lg"
               value={cost}
               onChange={(e) => setCost(e.target.value)}
             />
@@ -209,12 +207,7 @@ export function StockInForm({
           {error}
         </p>
       )}
-      <Button
-        type="submit"
-        size="lg"
-        className="h-12"
-        disabled={!valid || pending}
-      >
+      <Button type="submit" disabled={!valid || pending}>
         {pending ? "Saving…" : "Save stock in"}
       </Button>
     </form>

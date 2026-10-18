@@ -42,11 +42,10 @@ export function QtyChips({ unit, max, onPick }: QtyChipsProps) {
           onKey={(k) => setCustom(applyNumpadKey(custom, k, 6))}
         />
         <div className="grid grid-cols-2 gap-2">
-          <Button variant="outline" size="lg" onClick={() => setCustom(null)}>
+          <Button variant="outline" onClick={() => setCustom(null)}>
             Back
           </Button>
           <Button
-            size="lg"
             disabled={value <= 0 || tooMuch}
             onClick={() => onPick(value)}
           >
@@ -63,7 +62,7 @@ export function QtyChips({ unit, max, onPick }: QtyChipsProps) {
         <Button
           key={q}
           variant="secondary"
-          className="h-14 text-lg"
+
           disabled={max !== undefined && q > max}
           onClick={() => onPick(q)}
         >
@@ -72,7 +71,7 @@ export function QtyChips({ unit, max, onPick }: QtyChipsProps) {
       ))}
       <Button
         variant="outline"
-        className="col-span-2 h-14 text-lg"
+        className="col-span-2"
         onClick={() => setCustom("")}
       >
         Custom

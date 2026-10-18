@@ -93,7 +93,7 @@ export function UserForm({ user, shops, onSubmit }: UserFormProps) {
           inputMode="numeric"
           autoComplete="off"
           maxLength={4}
-          className="h-12 text-lg tracking-[0.5em]"
+          className="tracking-[0.5em]"
           value={pin}
           onChange={(e) =>
             setPin(e.target.value.replace(/\D/g, "").slice(0, 4))
@@ -105,7 +105,7 @@ export function UserForm({ user, shops, onSubmit }: UserFormProps) {
           {error}
         </p>
       )}
-      <Button type="submit" size="lg" disabled={!valid || pending}>
+      <Button type="submit" disabled={!valid || pending}>
         {pending ? "Saving…" : user ? "Save changes" : "Add user"}
       </Button>
     </form>

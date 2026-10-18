@@ -1,9 +1,7 @@
 // Seeds the database with demo data from seed-data.ts (2 shops, 3 users,
 // products, 70 days of sales). Wipes existing data first.
-// Run: pnpm db:seed   (PINs: owner 1111, staff 2222 / 3333)
+// Run: pnpm db:seed (seed-cli.ts; PINs: owner 1111, staff 2222 / 3333)
 // Tests call resetDatabase() to start each file from the same data.
-import { pathToFileURL } from "node:url"
-
 import bcrypt from "bcryptjs"
 import { sql } from "drizzle-orm"
 import { drizzle } from "drizzle-orm/node-postgres"
@@ -86,21 +84,4 @@ export async function resetDatabase(
   } finally {
     await pool.end()
   }
-}
-
-// CLI: `pnpm db:seed`
-if (
-  process.argv[1] &&
-  import.meta.url === pathToFileURL(process.argv[1]).href
-) {
-  resetDatabase(process.env.DATABASE_URL!)
-    .then((n) =>
-      console.log(
-        `Seeded: ${n.products} products, ${n.sales} sales, ${n.expenses} expenses`
-      )
-    )
-    .catch((e) => {
-      console.error(e)
-      process.exitCode = 1
-    })
 }

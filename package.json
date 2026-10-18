@@ -13,7 +13,7 @@
     "validate": "pnpm typecheck && pnpm lint && pnpm format && pnpm build",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:seed": "tsx --env-file=.env.local src/db/seed.ts",
+    "db:seed": "tsx --env-file=.env.local src/db/seed-cli.ts",
     "db:studio": "drizzle-kit studio",
     "test": "vitest run",
     "test:db": "vitest run -c vitest.db.config.ts",

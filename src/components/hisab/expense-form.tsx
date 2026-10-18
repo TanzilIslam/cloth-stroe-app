@@ -86,12 +86,7 @@ export function ExpenseForm({ onSubmit }: ExpenseFormProps) {
               {error}
             </p>
           )}
-          <Button
-            size="lg"
-            className="h-12"
-            disabled={pending || Number(amount) <= 0}
-            onClick={save}
-          >
+          <Button disabled={pending || Number(amount) <= 0} onClick={save}>
             {pending ? "Saving…" : "Save expense"}
           </Button>
         </>

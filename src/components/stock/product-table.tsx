@@ -105,7 +105,6 @@ export function ProductTable({
           placeholder="Search products"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="h-10"
         />
         <Select value={category} onValueChange={setCategory}>
           <SelectTrigger className="w-40" aria-label="Category">
