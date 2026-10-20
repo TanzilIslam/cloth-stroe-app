@@ -60,6 +60,6 @@ Suggested order: 1 → 2 → 3 → 6, then 4 and 5 when the data grows.
 - [ ] **Clean production seed** (`pnpm db:seed:prod`): only the 2 real shops and the owner account with a PIN read from an env var; no demo products or sales. Refuses to run if data already exists.
 - [ ] **Migrations on deploy:** run `pnpm db:migrate` automatically before the Vercel build (or as a GitHub Action), so a deploy never runs with an old schema.
 - [ ] **Backups and restore notes:** document Neon point-in-time restore and branch-based recovery in the README; test a restore once.
-- [ ] **CI:** GitHub Action running `pnpm validate`, `pnpm test`, `pnpm test:db` and `pnpm test:e2e` (with a Postgres service) on every push to `development`.
+- [ ] **CI:** GitHub Action running `pnpm validate`, `pnpm test`, `pnpm test:db` and `pnpm test:e2e` (with a Postgres service) on every push to `main`.
 
 **Outcome:** going live and every later deploy are repeatable, and data can be recovered.

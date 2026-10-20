@@ -58,5 +58,5 @@ If `TEST_DATABASE_URL` isn't set, say that the DB / E2E suites were skipped. Nev
 - Match the surrounding style: short comment at the top of each file, minimal code.
 
 ## Git
-- Work on `development`; `main` only gets merges.
+- Work directly on `main` (the `development` branch is no longer used).
 - Commit messages: short summary line, then bullet points of what changed.
