@@ -128,7 +128,7 @@ export default function SetupPage() {
           </Button>
           {(locks.data ?? []).length > 0 && (
             <section className="rounded-lg border border-destructive/30 bg-destructive/5 p-3">
-              <h3 className="mb-2 text-sm font-medium">
+              <h3 className="mb-2 font-semibold">
                 Locked devices (too many wrong PINs)
               </h3>
               <ul className="flex flex-col gap-2 text-sm">

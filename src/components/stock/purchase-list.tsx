@@ -22,7 +22,9 @@ export function PurchaseList({ rows, showCost }: PurchaseListProps) {
         <div className="min-w-28">
           <p className="font-medium">{r.productName}</p>
           {r.variant && (
-            <p className="text-xs text-muted-foreground">{r.variant}</p>
+            <p className="text-[0.8125rem] text-muted-foreground">
+              {r.variant}
+            </p>
           )}
         </div>
       ),

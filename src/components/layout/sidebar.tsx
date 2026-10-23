@@ -16,6 +16,7 @@ import {
 import { cn } from "@/lib/utils"
 import type { SessionUser, Shop } from "@/types"
 
+import { Brand } from "./brand"
 import { isActive, NAV_ITEMS } from "./nav-items"
 
 interface SidebarProps {
@@ -38,7 +39,7 @@ export function Sidebar({
 
   return (
     <aside className="sticky top-0 hidden h-svh w-60 shrink-0 flex-col border-r bg-sidebar p-4 lg:flex">
-      <p className="mb-4 px-2 text-lg font-semibold">Shop Dashboard</p>
+      <Brand className="mb-5 px-1" />
 
       {user.role === "owner" ? (
         <Select
@@ -86,8 +87,20 @@ export function Sidebar({
         </button>
       </nav>
 
-      <div className="mt-auto flex items-center justify-between gap-2 px-2">
-        <span className="truncate text-sm">{user.name}</span>
+      <div className="mt-auto flex items-center justify-between gap-2 border-t pt-3">
+        <span className="flex min-w-0 items-center gap-2">
+          <span className="grid size-8 shrink-0 place-items-center rounded-full bg-accent text-sm font-semibold text-accent-foreground">
+            {user.name.charAt(0)}
+          </span>
+          <span className="min-w-0">
+            <span className="block truncate text-sm font-medium">
+              {user.name}
+            </span>
+            <span className="block text-xs text-muted-foreground capitalize">
+              {user.role}
+            </span>
+          </span>
+        </span>
         <Button
           variant="ghost"
           size="icon"

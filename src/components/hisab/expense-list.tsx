@@ -26,7 +26,7 @@ export function ExpenseList({
   }
 
   return (
-    <ul className="flex flex-col divide-y rounded-lg border">
+    <ul className="flex flex-col divide-y surface">
       {expenses.map((e) => {
         const { label, icon: Icon } = EXPENSE_META[e.category]
         return (
@@ -34,7 +34,7 @@ export function ExpenseList({
             <Icon className="size-5 shrink-0 text-muted-foreground" />
             <div className="min-w-0 flex-1">
               <p className="text-sm font-medium">{label}</p>
-              <p className="truncate text-xs text-muted-foreground">
+              <p className="truncate text-[0.8125rem] text-muted-foreground">
                 {[formatDate(e.date), e.note].filter(Boolean).join(" · ")}
               </p>
             </div>

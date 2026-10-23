@@ -25,7 +25,7 @@ export function DuesList({ rows, shopName, onSettle }: DuesListProps) {
   }
 
   return (
-    <ul className="flex flex-col divide-y rounded-lg border">
+    <ul className="flex flex-col divide-y surface">
       {rows.map((row) => {
         const isCustomer = row.partyType === "customer"
         const message = `Dear ${row.party.name}, your due at ${shopName} is ${formatTaka(row.amount)}. Thank you, ${shopName}`
@@ -37,11 +37,17 @@ export function DuesList({ rows, shopName, onSettle }: DuesListProps) {
             <div className="min-w-0 flex-1">
               <p className="flex items-center gap-2 font-medium">
                 {row.party.name}
-                <Badge variant={isCustomer ? "secondary" : "outline"}>
+                <Badge
+                  className={
+                    isCustomer
+                      ? "border-transparent bg-primary/10 text-primary"
+                      : "border-transparent bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300"
+                  }
+                >
                   {isCustomer ? "Owes us" : "We owe"}
                 </Badge>
               </p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-[0.8125rem] text-muted-foreground">
                 {row.party.phone}
                 {row.since
                   ? ` · ${daysSince(row.since)} days`

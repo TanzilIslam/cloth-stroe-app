@@ -18,8 +18,13 @@ export function StockAlerts({
   return (
     <div className="grid gap-6 lg:grid-cols-2">
       <section>
-        <h3 className="mb-2 font-medium">Low stock ({lowStock.length})</h3>
-        <ul className="flex flex-col divide-y rounded-lg border">
+        <h3 className="mb-2 font-semibold">
+          Low stock{" "}
+          <span className="font-normal text-muted-foreground">
+            ({lowStock.length})
+          </span>
+        </h3>
+        <ul className="flex flex-col divide-y surface">
           {lowStock.length === 0 && (
             <li className="p-3 text-sm text-muted-foreground">
               All stocked up
@@ -59,8 +64,13 @@ export function StockAlerts({
       </section>
 
       <section>
-        <h3 className="mb-2 font-medium">Dead stock ({deadStock.length})</h3>
-        <ul className="flex flex-col divide-y rounded-lg border">
+        <h3 className="mb-2 font-semibold">
+          Dead stock{" "}
+          <span className="font-normal text-muted-foreground">
+            ({deadStock.length})
+          </span>
+        </h3>
+        <ul className="flex flex-col divide-y surface">
           {deadStock.length === 0 && (
             <li className="p-3 text-sm text-muted-foreground">
               Everything sold in the last 60 days

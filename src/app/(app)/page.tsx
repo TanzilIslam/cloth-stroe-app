@@ -1,12 +1,11 @@
 "use client"
 
-// Owner dashboard: today's numbers, comparison, bestsellers, peak times, alerts.
+// Owner dashboard: today's numbers with the weekly trend, bestsellers, peak times, alerts.
 // "Both" adds up the two shops. Staff see today's sale only.
 import { useState } from "react"
 
 import { AlertsCard } from "@/components/dashboard/alerts-card"
 import { Bestsellers } from "@/components/dashboard/bestsellers"
-import { ComparisonCard } from "@/components/dashboard/comparison-card"
 import { PeakTimes } from "@/components/dashboard/peak-times"
 import { TodaySummary } from "@/components/dashboard/today-summary"
 import { PageHeader } from "@/components/layout/page-header"
@@ -83,7 +82,7 @@ export default function DashboardPage() {
                 className={cn(
                   "rounded-md px-3 py-1 pointer-coarse:min-h-11",
                   both === o.value
-                    ? "bg-background font-medium shadow-sm"
+                    ? "bg-card font-medium shadow-sm"
                     : "text-muted-foreground"
                 )}
               >
@@ -100,10 +99,11 @@ export default function DashboardPage() {
         <Loading />
       ) : (
         <>
-          {stats.data && <TodaySummary stats={stats.data} />}
+          {stats.data && (
+            <TodaySummary stats={stats.data} trend={comparison.data} />
+          )}
           <div className="grid gap-4 lg:grid-cols-3">
             <div className="flex flex-col gap-4 lg:col-span-2">
-              {comparison.data && <ComparisonCard {...comparison.data} />}
               {peaks.data && <PeakTimes data={peaks.data} />}
             </div>
             <div className="flex flex-col gap-4">

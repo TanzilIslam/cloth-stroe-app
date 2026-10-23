@@ -51,7 +51,7 @@ export function ProductTable({
       cell: (p) => (
         <div className="min-w-32">
           <p className="font-medium">{p.name}</p>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-[0.8125rem] text-muted-foreground">
             {[p.brand, p.hasVariants && `${p.variants.length} variants`]
               .filter(Boolean)
               .join(" · ")}

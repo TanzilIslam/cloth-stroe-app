@@ -1,12 +1,14 @@
 "use client"
 
 // App shell: guards auth and role, bottom nav on mobile, sidebar on laptop.
-import { LogOut } from "lucide-react"
+import { ChevronsUpDown, LogOut, Store } from "lucide-react"
 import { usePathname, useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { toast } from "sonner"
 
 import { BottomNav } from "@/components/layout/bottom-nav"
+import { Brand } from "@/components/layout/brand"
+import { ExpenseSheetContext } from "@/components/layout/expense-sheet"
 import { useConfirm } from "@/components/shared/confirm-dialog"
 import { Loading } from "@/components/shared/load-state"
 import { Sidebar } from "@/components/layout/sidebar"
@@ -58,6 +60,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     [shopId, expenseOpen]
   )
   const [confirm, confirmDialog] = useConfirm()
+  const openExpense = useCallback(() => setExpenseOpen(true), [])
   const shopSwitch = useAction(switchShop, {
     success: (u) =>
       `Now in ${shops.find((s) => s.id === u.shopId)?.name ?? "the shop"}`,
@@ -108,23 +111,30 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         user={user}
         shops={shops}
         onShopChange={handleShopChange}
-        onExpense={() => setExpenseOpen(true)}
+        onExpense={openExpense}
         onLogout={handleLogout}
       />
 
       <div className="flex min-w-0 flex-1 flex-col">
-        {/* Mobile top bar */}
-        <div className="flex items-center justify-between border-b px-4 py-2 lg:hidden">
+        {/* Mobile top bar: brand, shop pill (owner taps to switch), logout */}
+        <div className="sticky top-0 z-30 flex items-center justify-between gap-2 border-b bg-card/95 px-4 py-2 backdrop-blur lg:hidden">
+          <Brand showName={false} />
           {user.role === "owner" ? (
             <button
               type="button"
-              className="-ml-2 min-h-11 px-2 text-sm font-medium"
+              className="flex min-h-11 items-center gap-1.5 rounded-full border bg-card px-3 text-sm font-medium shadow-xs active:bg-accent"
               onClick={() => nextShop && handleShopChange(nextShop.id)}
+              aria-label={`Shop: ${shop?.name}. Tap to switch`}
             >
-              {shop?.name} ⇄
+              <Store className="size-4 text-primary" />
+              {shop?.name}
+              <ChevronsUpDown className="size-3.5 text-muted-foreground" />
             </button>
           ) : (
-            <span className="text-sm font-medium">{shop?.name}</span>
+            <span className="flex items-center gap-1.5 rounded-full bg-accent px-3 py-1.5 text-sm font-medium text-accent-foreground">
+              <Store className="size-4" />
+              {shop?.name}
+            </span>
           )}
           <Button
             variant="ghost"
@@ -136,10 +146,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </Button>
         </div>
 
-        <main className="flex-1 p-4 pb-24 lg:p-6">{children}</main>
+        <main className="mx-auto w-full max-w-screen-2xl flex-1 p-4 pb-24 lg:p-8">
+          <ExpenseSheetContext value={openExpense}>
+            {children}
+          </ExpenseSheetContext>
+        </main>
       </div>
 
-      <BottomNav role={user.role} onExpense={() => setExpenseOpen(true)} />
+      <BottomNav role={user.role} onExpense={openExpense} />
 
       <Sheet open={expenseOpen} onOpenChange={setExpenseOpen}>
         <SheetContent side="bottom" className="max-h-[90svh] overflow-y-auto">
@@ -157,7 +171,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <TabsContent value="expense" className="mt-3 flex flex-col gap-4">
               <ExpenseForm onSubmit={saveExpense} />
               <div>
-                <h3 className="mb-2 text-sm font-medium">Today</h3>
+                <h3 className="mb-2 font-semibold">Today</h3>
                 {todayExpenses.loading ? (
                   <Loading />
                 ) : (

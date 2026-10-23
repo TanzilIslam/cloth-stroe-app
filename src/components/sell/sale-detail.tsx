@@ -23,14 +23,14 @@ export function SaleDetail({ sale }: { sale: SaleDetailData }) {
         {sale.userName}
         {sale.customerName && ` · ${sale.customerName}`}
       </p>
-      <ul className="flex flex-col divide-y rounded-lg border">
+      <ul className="flex flex-col divide-y surface">
         {sale.items.map((i, n) => (
           <li key={n} className="flex justify-between gap-3 px-3 py-2">
             <span className="min-w-0">
               <span className="block truncate font-medium">
                 {i.productName}
               </span>
-              <span className="text-xs text-muted-foreground">
+              <span className="text-[0.8125rem] text-muted-foreground">
                 {i.variant && `${i.variant} · `}
                 {i.qty} {i.unit} × <Money amount={i.price} />
               </span>

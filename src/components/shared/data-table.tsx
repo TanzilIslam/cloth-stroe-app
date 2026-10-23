@@ -31,7 +31,7 @@ export function DataTable<T>({
   empty = "Nothing here yet",
 }: DataTableProps<T>) {
   return (
-    <div className="rounded-lg border">
+    <div className="overflow-hidden surface">
       <Table>
         <TableHeader>
           <TableRow>

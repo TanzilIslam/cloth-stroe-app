@@ -100,11 +100,30 @@ export default function SellPage() {
                 </Link>
               </Button>
               <Button
-                variant={returnMode ? "destructive" : "outline"}
+                variant="outline"
                 onClick={() => setReturnMode(!returnMode)}
                 aria-pressed={returnMode}
+                className={cn(
+                  returnMode &&
+                    "border-destructive bg-destructive/10 text-destructive hover:bg-destructive/15 hover:text-destructive"
+                )}
               >
-                <Undo2 /> Return {returnMode ? "on" : "off"}
+                <Undo2 /> Return mode
+                {/* switch track */}
+                <span
+                  aria-hidden
+                  className={cn(
+                    "relative ml-1 h-4 w-7 rounded-full transition-colors",
+                    returnMode ? "bg-destructive" : "bg-muted-foreground/30"
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "absolute top-0.5 size-3 rounded-full bg-white shadow transition-all",
+                      returnMode ? "left-3.5" : "left-0.5"
+                    )}
+                  />
+                </span>
               </Button>
             </div>
           }
@@ -116,8 +135,10 @@ export default function SellPage() {
         />
 
         {returnMode && (
-          <p className="rounded-md bg-destructive/10 p-2 text-sm text-destructive">
-            Return mode: items you add are returned to stock.
+          <p className="flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+            <Undo2 className="size-4 shrink-0" />
+            Return mode is on: items you add go back into stock and are
+            refunded.
           </p>
         )}
 
@@ -128,18 +149,18 @@ export default function SellPage() {
         ) : list.length === 0 ? (
           <p className="text-sm text-muted-foreground">No products found</p>
         ) : (
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
             {list.map((p) => {
-              const available =
-                productStock(p) -
-                cart.items
-                  .filter((i) => i.product.id === p.id)
-                  .reduce((s, i) => s + i.qty, 0)
+              const inCart = cart.items
+                .filter((i) => i.product.id === p.id)
+                .reduce((s, i) => s + i.qty, 0)
+              const available = productStock(p) - inCart
               return (
                 <ProductTile
                   key={p.id}
                   product={p}
                   available={available}
+                  inCart={inCart}
                   disabled={!returnMode && available <= 0}
                   onSelect={() => setPicked(p)}
                 />
@@ -151,8 +172,15 @@ export default function SellPage() {
 
       {/* Tablet+: cart column */}
       <aside className="hidden md:block">
-        <div className="sticky top-6 rounded-lg border p-4">
-          <h2 className="mb-2 font-semibold">Cart</h2>
+        <div className="sticky top-20 flex max-h-[calc(100svh-7rem)] min-h-96 flex-col surface p-4 lg:top-8 lg:max-h-[calc(100svh-4rem)]">
+          <h2 className="mb-2 flex items-center justify-between font-semibold">
+            Cart
+            {cart.count > 0 && (
+              <span className="text-sm font-normal text-muted-foreground">
+                {cart.count} {cart.count === 1 ? "item" : "items"}
+              </span>
+            )}
+          </h2>
           <Cart cart={cart} onPay={openPay} />
         </div>
       </aside>

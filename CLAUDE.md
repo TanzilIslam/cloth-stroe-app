@@ -57,6 +57,13 @@ If `TEST_DATABASE_URL` isn't set, say that the DB / E2E suites were skipped. Nev
 - Schema change: edit `src/db/schema.ts` → `pnpm db:generate --name <what>` → commit the SQL in `drizzle/` → update `docs/about.md` and `docs/schema.md`.
 - Match the surrounding style: short comment at the top of each file, minimal code.
 
+## UI Style
+- Navy primary (`--primary`) only for actions, highlights and the "Today's sale" hero; everything else neutral.
+- Page background is light gray; content sits on white cards. Lists, tables and tiles use the `surface` utility (`src/app/globals.css`); inputs, dialogs and sheets are `bg-card`.
+- Section titles: `font-semibold`, counts / periods in `font-normal text-muted-foreground`. Secondary text in lists: `text-[0.8125rem] text-muted-foreground`.
+- App mark: `<Brand />` (`components/layout/brand.tsx`). Pages open the Expense & cash sheet with `useOpenExpenseSheet()`.
+- Check every UI change at phone (390), tablet (820) and desktop (1440).
+
 ## Git
 - Work directly on `main` (the `development` branch is no longer used).
 - Commit messages: short summary line, then bullet points of what changed.

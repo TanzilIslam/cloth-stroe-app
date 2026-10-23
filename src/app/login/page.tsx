@@ -5,6 +5,7 @@
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
 
+import { Brand } from "@/components/layout/brand"
 import { PinPad } from "@/components/shared/pin-pad"
 import { useSession } from "@/hooks/use-session"
 import { login } from "@/api"
@@ -34,12 +35,21 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="flex min-h-svh flex-col items-center justify-center gap-8 p-4">
-      <div className="text-center">
-        <h1 className="text-2xl font-semibold">Shop Dashboard</h1>
-        <p className="text-sm text-muted-foreground">Enter your PIN</p>
+    <main className="flex min-h-svh items-center justify-center p-4">
+      <div className="flex w-full max-w-sm flex-col items-center gap-6 surface px-6 py-8 shadow-sm sm:px-8">
+        <div className="flex flex-col items-center gap-3 text-center">
+          <Brand showName={false} size="lg" />
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight">
+              Shop Dashboard
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Enter your 4-digit PIN
+            </p>
+          </div>
+        </div>
+        <PinPad onSubmit={handleSubmit} />
       </div>
-      <PinPad onSubmit={handleSubmit} />
     </main>
   )
 }

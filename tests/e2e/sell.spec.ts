@@ -51,7 +51,7 @@ test("partial pay leaves a due and needs a customer", async ({ page }) => {
 
 test("return mode adds stock back and refunds", async ({ page }) => {
   await expect(tile(page, /Shirt Fabric White/)).toContainText("80 yard")
-  await page.getByRole("button", { name: /Return off/ }).click()
+  await page.getByRole("button", { name: /Return mode/ }).click()
   await tile(page, /Shirt Fabric White/).click()
   await dialog(page).getByRole("button", { name: "1", exact: true }).click()
   await page.getByRole("button", { name: /1 item\b/ }).click()

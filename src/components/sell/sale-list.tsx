@@ -19,7 +19,7 @@ export function SaleList({ sales, onSelect }: SaleListProps) {
   }
 
   return (
-    <ul className="flex flex-col divide-y rounded-lg border">
+    <ul className="flex flex-col divide-y surface">
       {sales.map((s) => {
         const net = s.total - s.discount
         const [first, ...rest] = s.items
@@ -28,33 +28,36 @@ export function SaleList({ sales, onSelect }: SaleListProps) {
             <button
               type="button"
               onClick={() => onSelect(s)}
-              className="flex w-full items-center gap-3 px-3 py-3 text-left hover:bg-accent"
+              className="flex w-full flex-col gap-1 px-3 py-3 text-left hover:bg-accent"
             >
-              <span className="w-16 shrink-0 text-sm text-muted-foreground tabular-nums">
-                {formatTime(s.createdAt)}
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block truncate text-sm font-medium">
+              <span className="flex w-full items-baseline justify-between gap-3">
+                <span className="min-w-0 truncate font-medium">
                   {first?.productName}
                   {rest.length > 0 && (
-                    <span className="text-muted-foreground">
+                    <span className="font-normal text-muted-foreground">
                       {" "}
-                      +{rest.length}
+                      +{rest.length} more
                     </span>
                   )}
                 </span>
-                <span className="text-xs text-muted-foreground">
-                  {[s.customerName, s.userName].filter(Boolean).join(" · ")}
-                </span>
+                <Money amount={net} className="shrink-0 font-semibold" />
               </span>
-              {net < 0 ? (
-                <Badge variant="destructive">Return</Badge>
-              ) : s.due > 0 ? (
-                <Badge variant="outline">Due</Badge>
-              ) : (
-                <Badge variant="secondary">{PAYMENT_LABELS[s.method]}</Badge>
-              )}
-              <Money amount={net} className="w-20 text-right font-semibold" />
+              <span className="flex w-full items-center justify-between gap-3 text-[0.8125rem] text-muted-foreground">
+                <span className="min-w-0 truncate tabular-nums">
+                  {[formatTime(s.createdAt), s.userName, s.customerName]
+                    .filter(Boolean)
+                    .join(" · ")}
+                </span>
+                {net < 0 ? (
+                  <Badge variant="destructive">Return</Badge>
+                ) : s.due > 0 ? (
+                  <Badge className="border-transparent bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300">
+                    Due
+                  </Badge>
+                ) : (
+                  <Badge variant="secondary">{PAYMENT_LABELS[s.method]}</Badge>
+                )}
+              </span>
             </button>
           </li>
         )

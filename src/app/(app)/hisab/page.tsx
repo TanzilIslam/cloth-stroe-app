@@ -1,9 +1,12 @@
 "use client"
 
 // Owner only: dues + payments, this month's expenses, cash count, monthly report.
+import { Wallet } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 
+import { Button } from "@/components/ui/button"
+import { useOpenExpenseSheet } from "@/components/layout/expense-sheet"
 import { PageHeader } from "@/components/layout/page-header"
 import { useConfirm } from "@/components/shared/confirm-dialog"
 import { LoadError, Loading, queryStatus } from "@/components/shared/load-state"
@@ -63,6 +66,7 @@ export default function HisabPage() {
   const status = queryStatus(dues, expenses, cash, counts, report)
   const [settling, setSettling] = useState<DueRow | null>(null)
   const [confirm, confirmDialog] = useConfirm()
+  const openExpense = useOpenExpenseSheet()
   const removeExpense = useAction(deleteExpense, {
     success: "Expense deleted",
     onDone: () => {
@@ -99,7 +103,15 @@ export default function HisabPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <PageHeader title="Hisab" subtitle={shopName} />
+      <PageHeader
+        title="Hisab"
+        subtitle={shopName}
+        actions={
+          <Button variant="outline" onClick={openExpense}>
+            <Wallet /> Add expense
+          </Button>
+        }
+      />
 
       {status.error && <LoadError onRetry={status.retry} />}
       {dues.loading && <Loading />}
@@ -182,8 +194,8 @@ export default function HisabPage() {
             />
           )}
           <section>
-            <h3 className="mb-2 font-medium">Past counts</h3>
-            <ul className="flex flex-col divide-y rounded-lg border text-sm">
+            <h3 className="mb-2 font-semibold">Past counts</h3>
+            <ul className="flex flex-col divide-y surface text-sm">
               {(counts.data ?? []).length === 0 && (
                 <li className="p-3 text-muted-foreground">No counts yet</li>
               )}

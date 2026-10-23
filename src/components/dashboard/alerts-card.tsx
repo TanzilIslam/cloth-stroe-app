@@ -18,7 +18,7 @@ export function AlertsCard({ lowStock, dues }: AlertsCardProps) {
   const oldestDues = dues.filter((d) => d.partyType === "customer").slice(0, 3)
 
   return (
-    <Card>
+    <Card className="gap-4 py-5 shadow-xs">
       <CardHeader>
         <CardTitle>Alerts</CardTitle>
       </CardHeader>

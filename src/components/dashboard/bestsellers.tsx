@@ -20,9 +20,12 @@ export function Bestsellers({ data }: { data: BestsellersData }) {
   const max = Math.max(1, ...rows.map((r) => r.value))
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between gap-2">
-        <CardTitle>Bestsellers · 30 days</CardTitle>
+    <Card className="gap-4 py-5 shadow-xs">
+      <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-2">
+        <CardTitle>
+          Bestsellers{" "}
+          <span className="font-normal text-muted-foreground">· 30 days</span>
+        </CardTitle>
         <div className="flex gap-1" role="group" aria-label="Group by">
           {VIEWS.map((v) => (
             <button

@@ -5,9 +5,12 @@ import type { NamedValue, PeakTimes as PeakTimesData } from "@/types"
 
 export function PeakTimes({ data }: { data: PeakTimesData }) {
   return (
-    <Card>
+    <Card className="gap-4 py-5 shadow-xs">
       <CardHeader>
-        <CardTitle>Peak times · 30 days</CardTitle>
+        <CardTitle>
+          Peak times{" "}
+          <span className="font-normal text-muted-foreground">· 30 days</span>
+        </CardTitle>
       </CardHeader>
       <CardContent className="grid gap-6 sm:grid-cols-2">
         <BarChart title="By hour" rows={data.hours} />
@@ -24,7 +27,7 @@ function BarChart({ title, rows }: { title: string; rows: NamedValue[] }) {
 
   return (
     <figure>
-      <figcaption className="mb-7 flex justify-between text-sm">
+      <figcaption className="mb-6 flex justify-between text-sm">
         <span className="font-medium">{title}</span>
         {best && (
           <span className="text-muted-foreground">Best: {best.label}</span>

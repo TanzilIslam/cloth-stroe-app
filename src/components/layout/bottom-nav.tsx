@@ -22,7 +22,7 @@ export function BottomNav({ role, onExpense }: BottomNavProps) {
   const pathname = usePathname()
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 flex border-t bg-background pb-[env(safe-area-inset-bottom)] lg:hidden">
+    <nav className="fixed inset-x-0 bottom-0 z-40 flex border-t bg-card pb-[env(safe-area-inset-bottom)] lg:hidden">
       {NAV_ITEMS[role].map(({ href, label, icon: Icon }) => (
         <Link
           key={href}

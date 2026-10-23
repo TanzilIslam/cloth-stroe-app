@@ -44,8 +44,8 @@ export function VariantForm({ variants, onAdd, onDelete }: VariantFormProps) {
 
   return (
     <div className="flex flex-col gap-3">
-      <h3 className="font-medium">Variants</h3>
-      <ul className="flex flex-col divide-y rounded-lg border">
+      <h3 className="font-semibold">Variants</h3>
+      <ul className="flex flex-col divide-y surface">
         {variants.length === 0 && (
           <li className="p-3 text-sm text-muted-foreground">No variants yet</li>
         )}

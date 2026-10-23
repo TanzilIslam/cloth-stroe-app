@@ -19,7 +19,18 @@ export default defineConfig({
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
   },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+  projects: [
+    {
+      name: "chromium",
+      use: {
+        ...devices["Desktop Chrome"],
+        // Optional: use a preinstalled Chromium (e.g. in cloud containers)
+        launchOptions: {
+          executablePath: process.env.PW_CHROMIUM_PATH || undefined,
+        },
+      },
+    },
+  ],
   webServer: {
     command: `pnpm build && pnpm start -p ${PORT}`,
     url: `http://localhost:${PORT}/login`,
