@@ -49,6 +49,7 @@ Next.js app for the men's and women's shops: sales, stock and hisab.
 1. Create a separate database whose name contains `test`, e.g. local `shop_test` or a Neon branch. Tests **wipe it**.
 2. `cp .env.test.example .env.test` and set `TEST_DATABASE_URL`.
 3. `pnpm exec playwright install chromium`
+4. Optional: `E2E_PORT` if port 3100 is busy; `PW_CHROMIUM_PATH` to use an already installed Chromium.
 
 Each DB and E2E test file migrates and re-seeds the test database first, so files don't depend on each other.
 
@@ -57,4 +58,5 @@ Each DB and E2E test file migrates and re-seeds the test database first, so file
 - Staff on the same shop Wi-Fi share one IP, so one person's mistakes can lock the others.
 
 ## Known Issues (fix later)
+- Next.js 16.4.0 has a security advisory; the upgrade is postponed. Until then `next build` (and `pnpm validate`, `pnpm test:e2e`) stops once with a reminder; run it again and it continues.
 - Login checks the PIN against every user's hash (fine for a few users).

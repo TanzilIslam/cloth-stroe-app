@@ -1,5 +1,22 @@
 # Standup
 
+## 2026-10-23
+
+**Done since 2026-10-16**
+- Neon set up; unit, DB and E2E suites run and passing; fixes merged (compact UI sizes, stock-in supplier default, seed CLI split, test timing).
+- Work now happens directly on `main` (`development` kept but unused).
+- Quick improvements: shared constants (`ERRORS`, `ROUTES`, `SHOP_TZ`, cookie name), CHECK constraints (migration 0003), money rounding, env check at startup, `useAction` toasts, `useConfirm` dialogs, loaders.
+- UI polish at phone / tablet / desktop: gray page + white cards, brand mark, navy dashboard hero, in-cart POS tiles, Return mode switch, sticky cart, cleaner lists and badges.
+- Faint navy grid on the login and empty states (`EmptyState`).
+
+**Checks (latest push)**
+- `pnpm validate` ✅, unit 22 ✅, DB 52 ✅, E2E 32 ✅.
+
+**Next**
+- Go-live: Vercel env vars + deploy, clean production seed (`task-backend.md` § 6).
+- Next.js security upgrade (postponed; build shows a one-time reminder until done).
+- Remaining improvements: client Zod, forms on `useAction`, money confirms, action helper, error codes.
+
 ## 2026-10-16
 
 **Backend (built and tested here on a local Postgres)**

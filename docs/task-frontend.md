@@ -116,7 +116,7 @@ Found in a review after the backend was done. Nothing is broken; these make the 
 
 ### 1. Reusable building blocks
 - [x] **`ROUTES` constant** (`src/lib/routes.ts`): one place for `"/"`, `"/login"`, `"/sell"`, `"/sell/history"`, `"/stock"`, `"/hisab"`, `"/setup"`. Use it in nav items, redirects, links, `proxy.ts` and `OWNER_ONLY`.
-- [x] **Shop time zone constant:** `"Asia/Dhaka"` is written in `src/lib/utils.ts`, `src/db/time.ts` and `comparison-card.tsx`. Export one `SHOP_TZ` and use it everywhere (SQL included).
+- [x] **Shop time zone constant:** `"Asia/Dhaka"` is written in `src/lib/utils.ts`, `src/db/time.ts` (now `src/db/sql.ts`) and `comparison-card.tsx`. Export one `SHOP_TZ` and use it everywhere (SQL included).
 - [x] **Payment method labels:** "Cash" / "bKash" / "Due" are repeated in the pay dialog, payment form and sale list. Add `PAYMENT_LABELS` next to the enums in `src/types`.
 - [ ] **Form field style:** the `flex flex-col gap-1.5 text-sm font-medium` label class is copied in several forms. Make a small `Field` component in `components/shared/` and use it in every form.
 - [x] **Remove unused shadcn `label`** (`src/components/ui/label.tsx`): no file imports it.
@@ -158,3 +158,15 @@ Done so far: the hook and every one-click action. Forms still use their own pend
 - [ ] Receive / pay a payment of more than ৳10,000
 
 **Outcome:** no destructive or money-moving action happens from a single accidental tap.
+
+---
+
+## UI Polish (2026-10-23)
+Design critique at phone / tablet / desktop, navy style kept. All done:
+- [x] Light gray page with white cards; `surface` utility for lists, tables and tiles
+- [x] Brand mark in the sidebar, mobile top bar and login; mobile shop pill; sidebar user block
+- [x] Dashboard: navy "Today's sale" hero with the weekly trend; tighter card headers
+- [x] Sell: in-cart tile ring + qty badge, "Return mode" switch, sticky cart with empty state, discount field with ৳ prefix, larger Pay button, 5 columns on wide screens
+- [x] Two-line sales history rows; tinted due badges; "Add expense" in Hisab
+- [x] Consistent section titles and 13px secondary text; white inputs and selects
+- [x] Faint navy grid on the login and empty states (`EmptyState` component)

@@ -10,12 +10,14 @@ Instructions for Claude Code in this repo. Project docs live in `docs/` (start w
 | `pnpm validate` | typecheck → lint → format (writes files) → build | nothing |
 | `pnpm test` | Unit tests (`tests/unit`) | nothing |
 | `pnpm test:db` | Server Action tests (`tests/db`) | `TEST_DATABASE_URL` |
-| `pnpm test:e2e` | Playwright browser tests (`tests/e2e`), builds + starts the app on port 3100 | `TEST_DATABASE_URL`, `pnpm exec playwright install chromium` once |
+| `pnpm test:e2e` | Playwright browser tests (`tests/e2e`), builds + starts the app on port 3100 (`E2E_PORT` to change; `PW_CHROMIUM_PATH` for a preinstalled Chromium) | `TEST_DATABASE_URL`, `pnpm exec playwright install chromium` once |
 | `pnpm test:all` | unit → db → e2e | both of the above |
 | `pnpm db:generate --name <name>` | New SQL migration from `src/db/schema.ts` | — |
 | `pnpm db:migrate` / `pnpm db:seed` | Apply migrations / load demo data into `DATABASE_URL` | `.env.local` |
 
 Use pnpm only (never npm or yarn).
+
+**Known:** Next.js 16.4.0 has a security advisory (upgrade not done yet, by choice). `next build` stops once to show the reminder; run it again and it continues. This also affects `pnpm validate` and the E2E web server.
 
 ## Before Every Push
 1. `pnpm validate` must pass. It reformats files, so check `git status` and commit those changes too.
@@ -53,7 +55,7 @@ If `TEST_DATABASE_URL` isn't set, say that the DB / E2E suites were skipped. Nev
 - Money and qty computed on the server go through `roundMoney()`; the database also has CHECK constraints (`drizzle/0003`).
 - Stock or balance changes go in one `db.transaction`.
 - Staff must never receive cost price or profit.
-- "Today", hours and dates use Asia/Dhaka (`src/db/time.ts`, `shopDay` / `formatDate` in `src/lib/utils.ts`).
+- "Today", hours and dates use Asia/Dhaka: `SHOP_TZ` in `src/lib/config.ts`, SQL helpers in `src/db/sql.ts`, `shopDay` / `formatDate` in `src/lib/utils.ts`.
 - Schema change: edit `src/db/schema.ts` → `pnpm db:generate --name <what>` → commit the SQL in `drizzle/` → update `docs/about.md` and `docs/schema.md`.
 - Match the surrounding style: short comment at the top of each file, minimal code.
 
@@ -62,6 +64,7 @@ If `TEST_DATABASE_URL` isn't set, say that the DB / E2E suites were skipped. Nev
 - Page background is light gray; content sits on white cards. Lists, tables and tiles use the `surface` utility (`src/app/globals.css`); inputs, dialogs and sheets are `bg-card`.
 - Section titles: `font-semibold`, counts / periods in `font-normal text-muted-foreground`. Secondary text in lists: `text-[0.8125rem] text-muted-foreground`.
 - App mark: `<Brand />` (`components/layout/brand.tsx`). Pages open the Expense & cash sheet with `useOpenExpenseSheet()`.
+- Empty lists / panels use `<EmptyState>` (icon, title, hint on the faint `bg-grid`). The grid is only for the login and empty states, never behind working content.
 - Check every UI change at phone (390), tablet (820) and desktop (1440).
 
 ## Git

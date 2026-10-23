@@ -2,7 +2,7 @@
 
 A high-level overview of the app structure. It is a **guide, not a strict rule**: files and functions grow or shrink with complexity.
 
-**Now:** 33 `.ts` + 47 `.tsx` files (+11 shadcn), 44 Server Actions. (Starting estimate was 20 + 35 files, 80–85 functions.)
+**Now:** 41 `.ts` + 50 `.tsx` files (+10 shadcn), 44 Server Actions. (Starting estimate was 20 + 35 files, 80–85 functions.)
 
 ## Principles
 - One file = one domain.
@@ -30,9 +30,9 @@ src/
 |---|---|---|
 | Actions | `auth`, `users`, `sales`, `products`, `purchases`, `parties`, `expenses`, `cash`, `reports` | Read and write data for each domain |
 | DB | `schema`, `index`, `time`, `products`, `seed`, `seed-data` | Tables, connection, Dhaka time SQL, shared product reads, demo data |
-| Lib | `session`, `login-limit`, `action`, `result`, `session-store`, `utils`, `calc` | PIN session + guards, attempt limit, `{ ok, data \| error }`, client user cache, formatting (Taka, dates, WhatsApp), profit and reorder math |
+| Lib | `session`, `login-limit`, `action`, `result`, `session-store`, `env`, `config`, `errors`, `routes`, `utils`, `calc` | PIN session + guards, attempt limit, `{ ok, data \| error }`, client user cache, env check, shared constants (time zone, cookie, error text, URLs), formatting, profit / reorder / rounding math |
 | Types | `index`, `validations` | Interfaces and Zod schemas |
-| Hooks | `use-cart`, `use-session`, `use-shops`, `use-query` | POS cart, current user, shops, page data loading |
+| Hooks | `use-cart`, `use-session`, `use-shops`, `use-query`, `use-action` | POS cart, current user, shops, page data loading, mutations with pending + toasts |
 | Config | `proxy`, `drizzle.config` | Route protection, migrations |
 
 ## Server Actions (44)
@@ -61,7 +61,7 @@ Staff never receive cost price or profit. The client calls these through `src/ap
 | `/setup` | Owner: staff accounts, customers, suppliers | `setup` |
 | Layouts | Root + app shell (bottom nav / sidebar) | `layout` |
 
-Shared UI (Numpad, StatCard, DataTable, Money) lives in `components/shared/`. shadcn files in `components/ui/` are not tracked here.
+Shared UI lives in `components/shared/`: `Numpad`, `PinPad`, `StatCard`, `DataTable`, `Money`, `Loading` / `LoadError`, `EmptyState`, `useConfirm` (confirm dialog). Layout pieces in `components/layout/`: `Brand`, `Sidebar`, `BottomNav`, `PageHeader`, nav items, and the Expense sheet context. shadcn files in `components/ui/` are not tracked here.
 
 ## Build Steps
 1. ✅ Next.js app, frontend with mock data, polish + PWA
@@ -69,6 +69,7 @@ Shared UI (Numpad, StatCard, DataTable, Money) lives in `components/shared/`. sh
 3. ✅ Login + session + guards
 4. ✅ Server Actions for every page, Zod validation
 5. ✅ `/setup`, sales / stock-in history, staff cash count, PIN limit
-6. ⬜ Go-live: Neon, Vercel, clean production seed
+6. ✅ Quick improvements, Neon setup, UI polish
+7. ⬜ Go-live: Vercel, clean production seed
 
 Update this file as functions are added.

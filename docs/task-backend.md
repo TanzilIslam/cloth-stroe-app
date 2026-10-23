@@ -7,7 +7,7 @@ This file tracks **later improvements** found in a review. Nothing here is broke
 
 Suggested order: 1 → 2 → 3 → 6, then 4 and 5 when the data grows.
 
-**Progress:** 8 / 27 done (quick wins on 2026-10-16). Next up: clean production seed (needed for go-live), action helper, error codes.
+**Progress:** 8 / 27 done (quick wins on 2026-10-16). Neon is set up and all test suites pass (2026-10-20). Next up: clean production seed (needed for go-live), action helper, error codes.
 
 ---
 

@@ -53,9 +53,15 @@ The **Expense** button (bottom nav / sidebar) opens a sheet with two tabs: add e
 - **Hidden from staff:** cost price and profit.
 
 ## Layouts
-- **Mobile (<768px, staff):** bottom nav with 3 big buttons, stacked number cards, numpad.
-- **Tab (md, counter):** POS split, product grid left, cart right.
-- **Laptop (lg, owner):** sidebar plus data tables, filters, editing, reports.
+- **Mobile (<768px, staff):** sticky top bar (logo, shop pill, logout), bottom nav with big buttons, stacked number cards, numpad.
+- **Tab (md, counter):** POS split, product grid left, sticky cart right.
+- **Laptop (lg, owner):** sidebar (logo, shop switcher, nav, user) plus data tables, filters, editing, reports.
+
+## Look
+- Navy primary for actions and highlights only; neutral grays for everything else.
+- Light cool-gray page with white cards; "Today's sale" is a navy hero card with the weekly trend.
+- In-cart POS tiles get a navy ring and qty badge; Return mode is a switch that turns red.
+- A faint navy grid only on the login and empty states.
 
 ## Stack Notes
 - **Data layer:** Drizzle ORM + `pg` (node-postgres) on Neon's pooled connection, Server Actions (no separate API). `pg` also runs against a local Postgres for testing.
@@ -66,6 +72,7 @@ The **Expense** button (bottom nav / sidebar) opens a sheet with two tabs: add e
 - **Session check:** every action re-reads the user from the database, so deactivation and role changes apply at once.
 - **Login limit:** 5 wrong PINs in 15 min lock that device (IP) for 15 min; the owner can unlock on `/setup`.
 - **Mobile install:** PWA, so staff can add it to their home screen.
+- **Rendering:** client-rendered app behind the PIN login; `cacheComponents` and `partialPrefetching` are off in `next.config.ts`.
 
 ## Build Order
 1. ✅ Frontend with mock data (all pages, polish, PWA)
@@ -75,7 +82,10 @@ The **Expense** button (bottom nav / sidebar) opens a sheet with two tabs: add e
 5. ✅ Zod validation
 6. ✅ `/setup`, sales history, stock-in history, staff cash count
 7. ✅ PIN attempt limit
-8. ⬜ Go-live: Neon on PC, Vercel deploy, clean production seed
+8. ✅ Quick improvements (shared constants, CHECK constraints, confirm dialogs, toasts, loaders)
+9. ✅ Neon set up; all test suites passing
+10. ✅ UI polish for mobile, tablet and desktop
+11. ⬜ Go-live: Vercel deploy, clean production seed
 
 ## Decisions
 - No wall board / kiosk screen: the owner dashboard with the Both toggle covers it.
