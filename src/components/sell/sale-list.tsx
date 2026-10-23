@@ -1,4 +1,7 @@
 // One day's sales: time, items, method and total. Tap a row for details.
+import { Receipt } from "lucide-react"
+
+import { EmptyState } from "@/components/shared/empty-state"
 import { Money } from "@/components/shared/money"
 import { Badge } from "@/components/ui/badge"
 import { formatTime } from "@/lib/utils"
@@ -12,9 +15,12 @@ interface SaleListProps {
 export function SaleList({ sales, onSelect }: SaleListProps) {
   if (sales.length === 0) {
     return (
-      <p className="py-6 text-center text-sm text-muted-foreground">
-        No sales this day
-      </p>
+      <EmptyState
+        icon={Receipt}
+        title="No sales this day"
+        hint="Sales made on this day will show here."
+        className="surface"
+      />
     )
   }
 

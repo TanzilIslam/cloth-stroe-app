@@ -1,7 +1,8 @@
 // Dues oldest first: customers who owe us, suppliers we owe.
 // Customers get a WhatsApp reminder link.
-import { MessageCircle } from "lucide-react"
+import { CheckCircle2, MessageCircle } from "lucide-react"
 
+import { EmptyState } from "@/components/shared/empty-state"
 import { Money } from "@/components/shared/money"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -18,9 +19,12 @@ interface DuesListProps {
 export function DuesList({ rows, shopName, onSettle }: DuesListProps) {
   if (rows.length === 0) {
     return (
-      <p className="py-6 text-center text-sm text-muted-foreground">
-        No dues 🎉
-      </p>
+      <EmptyState
+        icon={CheckCircle2}
+        title="No dues"
+        hint="Nobody owes the shop and the shop owes nobody."
+        className="surface"
+      />
     )
   }
 

@@ -3,6 +3,7 @@
 // Current sale: items (+/- qty, remove), discount, total and Pay button.
 import { Minus, Plus, ShoppingCart, Trash2 } from "lucide-react"
 
+import { EmptyState } from "@/components/shared/empty-state"
 import { Money } from "@/components/shared/money"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -22,13 +23,12 @@ function stockOf(item: CartItem) {
 export function Cart({ cart, onPay }: CartProps) {
   if (cart.count === 0) {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-2 py-10 text-center">
-        <span className="grid size-12 place-items-center rounded-full bg-accent text-accent-foreground">
-          <ShoppingCart className="size-5" />
-        </span>
-        <p className="font-medium">Cart is empty</p>
-        <p className="text-sm text-muted-foreground">Tap a product to add it</p>
-      </div>
+      <EmptyState
+        icon={ShoppingCart}
+        title="Cart is empty"
+        hint="Tap a product to add it"
+        className="flex-1"
+      />
     )
   }
 

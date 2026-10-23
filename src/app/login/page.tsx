@@ -35,7 +35,11 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="flex min-h-svh items-center justify-center p-4">
+    <main className="relative isolate flex min-h-svh items-center justify-center overflow-hidden p-4">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10 bg-grid [background-size:32px_32px]"
+      />
       <div className="flex w-full max-w-sm flex-col items-center gap-6 surface px-6 py-8 shadow-sm sm:px-8">
         <div className="flex flex-col items-center gap-3 text-center">
           <Brand showName={false} size="lg" />

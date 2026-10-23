@@ -1,6 +1,7 @@
 // Expense rows: category, note, date, amount. Delete button for owner.
-import { Trash2 } from "lucide-react"
+import { Trash2, Wallet } from "lucide-react"
 
+import { EmptyState } from "@/components/shared/empty-state"
 import { Money } from "@/components/shared/money"
 import { Button } from "@/components/ui/button"
 import { formatDate } from "@/lib/utils"
@@ -20,9 +21,7 @@ export function ExpenseList({
   empty = "No expenses",
 }: ExpenseListProps) {
   if (expenses.length === 0) {
-    return (
-      <p className="py-4 text-center text-sm text-muted-foreground">{empty}</p>
-    )
+    return <EmptyState icon={Wallet} title={empty} className="surface py-8" />
   }
 
   return (
