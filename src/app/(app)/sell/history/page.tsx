@@ -2,7 +2,6 @@
 
 // Sales history: pick a day, see totals and every sale; tap one for details.
 // View only: mistakes are fixed with Return mode on /sell.
-import { ChevronLeft, ChevronRight } from "lucide-react"
 import { useState } from "react"
 
 import { PageHeader } from "@/components/layout/page-header"
@@ -11,7 +10,7 @@ import { SaleList } from "@/components/sell/sale-list"
 import { LoadError, Loading } from "@/components/shared/load-state"
 import { Money } from "@/components/shared/money"
 import { StatCard } from "@/components/shared/stat-card"
-import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import {
   Dialog,
   DialogContent,
@@ -26,52 +25,28 @@ import { PAYMENT_LABELS, type SaleDetail as SaleDetailData } from "@/types"
 
 export default function SalesHistoryPage() {
   const user = useSession()!
-  const [offset, setOffset] = useState(0) // 0 = today, -1 = yesterday …
-  const day = shopDay(offset)
+  const today = shopDay()
+  const [picked, setDay] = useState(today)
+  const day = picked > today ? today : picked
   const sales = useQuery(() => getSales(user.shopId, day), [user.shopId, day])
   const [selected, setSelected] = useState<SaleDetailData | null>(null)
 
   const rows = sales.data ?? []
   const sum = (pick: (s: SaleDetailData) => number) =>
     rows.reduce((a, s) => a + pick(s), 0)
-  const label =
-    offset === 0
-      ? "Today"
-      : offset === -1
-        ? "Yesterday"
-        : new Date(`${day}T00:00:00`).toLocaleDateString("en-GB", {
-            weekday: "short",
-            day: "numeric",
-            month: "short",
-          })
-
   return (
     <div className="flex flex-col gap-4">
       <PageHeader
         title="Sales history"
         actions={
-          <div className="flex items-center gap-1">
-            <Button
-              variant="outline"
-              size="icon"
-              aria-label="Previous day"
-              onClick={() => setOffset(offset - 1)}
-            >
-              <ChevronLeft />
-            </Button>
-            <span className="w-24 text-center text-sm font-medium">
-              {label}
-            </span>
-            <Button
-              variant="outline"
-              size="icon"
-              aria-label="Next day"
-              disabled={offset >= 0}
-              onClick={() => setOffset(offset + 1)}
-            >
-              <ChevronRight />
-            </Button>
-          </div>
+          <Input
+            type="date"
+            aria-label="Date"
+            className="w-auto"
+            value={day}
+            max={today}
+            onChange={(e) => e.target.value && setDay(e.target.value)}
+          />
         }
       />
 

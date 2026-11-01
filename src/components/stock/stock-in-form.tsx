@@ -88,8 +88,8 @@ export function StockInForm({
   }
 
   return (
-    <form onSubmit={submit} className="flex flex-col gap-3">
-      <label className="flex flex-col gap-1.5 text-sm font-medium">
+    <form onSubmit={submit} className="flex flex-col gap-2.5 sm:gap-3">
+      <label className="flex flex-col gap-1 text-[0.8125rem] font-medium sm:gap-1.5 sm:text-sm">
         Product
         <Select
           value={productId ? String(productId) : ""}
@@ -115,7 +115,7 @@ export function StockInForm({
       </label>
 
       {product?.hasVariants && (
-        <label className="flex flex-col gap-1.5 text-sm font-medium">
+        <label className="flex flex-col gap-1 text-[0.8125rem] font-medium sm:gap-1.5 sm:text-sm">
           Variant
           <Select
             value={variantId ? String(variantId) : ""}
@@ -139,7 +139,7 @@ export function StockInForm({
       )}
 
       <div className="grid grid-cols-2 gap-3">
-        <label className="flex flex-col gap-1.5 text-sm font-medium">
+        <label className="flex flex-col gap-1 text-[0.8125rem] font-medium sm:gap-1.5 sm:text-sm">
           Qty {product && `(${product.unit})`}
           <Input
             type="number"
@@ -151,7 +151,7 @@ export function StockInForm({
           />
         </label>
         {isOwner && (
-          <label className="flex flex-col gap-1.5 text-sm font-medium">
+          <label className="flex flex-col gap-1 text-[0.8125rem] font-medium sm:gap-1.5 sm:text-sm">
             Cost / unit ৳
             <Input
               type="number"
@@ -164,7 +164,7 @@ export function StockInForm({
         )}
       </div>
 
-      <label className="flex flex-col gap-1.5 text-sm font-medium">
+      <label className="flex flex-col gap-1 text-[0.8125rem] font-medium sm:gap-1.5 sm:text-sm">
         Supplier
         <Select
           value={supplierId ? String(supplierId) : ""}
@@ -185,7 +185,7 @@ export function StockInForm({
 
       {isOwner && (
         <div className="grid grid-cols-2 items-end gap-3">
-          <label className="flex flex-col gap-1.5 text-sm font-medium">
+          <label className="flex flex-col gap-1 text-[0.8125rem] font-medium sm:gap-1.5 sm:text-sm">
             Paid now ৳
             <Input
               type="number"

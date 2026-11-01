@@ -18,12 +18,12 @@ export function ProductSearch({
 }: ProductSearchProps) {
   return (
     <div className="relative">
-      <Search className="pointer-events-none absolute top-1/2 left-3 size-5 -translate-y-1/2 text-muted-foreground" />
+      <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
       <Input
         type="search"
         inputMode="search"
         placeholder="Search name or barcode"
-        className="pr-10 pl-10"
+        className="pr-9 pl-9"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={(e) => e.key === "Enter" && onSubmit?.()}
@@ -32,10 +32,10 @@ export function ProductSearch({
         <button
           type="button"
           aria-label="Clear search"
-          className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground"
+          className="absolute top-1/2 right-2.5 -translate-y-1/2 text-muted-foreground"
           onClick={() => onChange("")}
         >
-          <X className="size-5" />
+          <X className="size-4" />
         </button>
       )}
     </div>

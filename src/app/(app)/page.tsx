@@ -66,7 +66,7 @@ export default function DashboardPage() {
         subtitle={shopName}
         actions={
           <div
-            className="flex rounded-lg bg-secondary p-1 text-sm"
+            className="flex rounded-lg bg-secondary p-0.5 text-xs"
             role="group"
             aria-label="Scope"
           >
@@ -80,7 +80,7 @@ export default function DashboardPage() {
                 aria-pressed={both === o.value}
                 onClick={() => setBoth(o.value)}
                 className={cn(
-                  "rounded-md px-3 py-1 pointer-coarse:min-h-11",
+                  "rounded-md px-2.5 py-1",
                   both === o.value
                     ? "bg-card font-medium shadow-sm"
                     : "text-muted-foreground"

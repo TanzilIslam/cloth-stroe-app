@@ -37,12 +37,12 @@ export function PaymentForm({ row, onSubmit }: PaymentFormProps) {
   }
 
   return (
-    <form onSubmit={submit} className="flex flex-col gap-3">
+    <form onSubmit={submit} className="flex flex-col gap-2.5 sm:gap-3">
       <p className="text-sm text-muted-foreground">
         Balance{" "}
         <Money amount={row.amount} className="font-medium text-foreground" />
       </p>
-      <label className="flex flex-col gap-1.5 text-sm font-medium">
+      <label className="flex flex-col gap-1 text-[0.8125rem] font-medium sm:gap-1.5 sm:text-sm">
         Amount ৳
         <Input
           type="number"

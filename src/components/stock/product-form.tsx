@@ -78,7 +78,7 @@ export function ProductForm({
   }
 
   return (
-    <form onSubmit={submit} className="grid grid-cols-2 gap-3">
+    <form onSubmit={submit} className="grid grid-cols-2 gap-2.5 sm:gap-3">
       <Field label="Name" className="col-span-2">
         <Input
           required
@@ -201,7 +201,10 @@ function Field({
 }) {
   return (
     <label
-      className={cn("flex flex-col gap-1.5 text-sm font-medium", className)}
+      className={cn(
+        "flex flex-col gap-1 text-[0.8125rem] font-medium sm:gap-1.5 sm:text-sm",
+        className
+      )}
     >
       {label}
       {children}

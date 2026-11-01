@@ -20,7 +20,8 @@ interface UserFormProps {
   onSubmit: (input: UserInput) => Promise<void>
 }
 
-const field = "flex flex-col gap-1.5 text-sm font-medium"
+const field =
+  "flex flex-col gap-1 text-[0.8125rem] font-medium sm:gap-1.5 sm:text-sm"
 
 export function UserForm({ user, shops, onSubmit }: UserFormProps) {
   const [name, setName] = useState(user?.name ?? "")
@@ -46,7 +47,7 @@ export function UserForm({ user, shops, onSubmit }: UserFormProps) {
   }
 
   return (
-    <form onSubmit={submit} className="flex flex-col gap-3">
+    <form onSubmit={submit} className="flex flex-col gap-2.5 sm:gap-3">
       <label className={field}>
         Name
         <Input

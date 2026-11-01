@@ -21,8 +21,8 @@ export function Bestsellers({ data }: { data: BestsellersData }) {
 
   return (
     <Card className="gap-4 py-5 shadow-xs">
-      <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-2">
-        <CardTitle>
+      <CardHeader className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <CardTitle className="whitespace-nowrap">
           Bestsellers{" "}
           <span className="font-normal text-muted-foreground">· 30 days</span>
         </CardTitle>
@@ -34,7 +34,7 @@ export function Bestsellers({ data }: { data: BestsellersData }) {
               aria-pressed={view === v.key}
               onClick={() => setView(v.key)}
               className={cn(
-                "rounded-md px-2 py-1 text-xs pointer-coarse:min-h-11",
+                "rounded-md px-2 py-0.5 text-xs",
                 view === v.key
                   ? "bg-secondary font-medium"
                   : "text-muted-foreground"

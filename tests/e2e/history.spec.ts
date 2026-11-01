@@ -29,8 +29,9 @@ test("a new sale is on top of today's history with its details", async ({
 
   await page.getByRole("link", { name: "Sales history" }).click()
   await expect(page).toHaveURL(/\/sell\/history$/)
-  await expect(page.getByText("Today", { exact: true })).toBeVisible()
-  await expect(page.getByRole("button", { name: "Next day" })).toBeDisabled()
+  const date = page.getByLabel("Date")
+  const today = await date.inputValue()
+  await expect(date).toHaveAttribute("max", today)
 
   const first = page.locator("main ul li").first()
   await expect(first).toContainText("Pant Fabric Grey")
@@ -40,8 +41,8 @@ test("a new sale is on top of today's history with its details", async ({
   await expect(dialog(page)).toContainText("Rahim")
   await page.keyboard.press("Escape")
 
-  await page.getByRole("button", { name: "Previous day" }).click()
-  await expect(page.getByText("Yesterday", { exact: true })).toBeVisible()
+  await date.fill("2020-01-01")
+  await expect(page.getByText("No sales this day")).toBeVisible()
 })
 
 test("stock-in history: owner sees total and paid, staff don't", async ({
