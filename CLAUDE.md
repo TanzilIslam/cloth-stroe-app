@@ -65,6 +65,8 @@ If `TEST_DATABASE_URL` isn't set, say that the DB / E2E suites were skipped. Nev
 - Section titles: `font-semibold`, counts / periods in `font-normal text-muted-foreground`. Secondary text in lists: `text-[0.8125rem] text-muted-foreground`.
 - App mark: `<Brand />` (`components/layout/brand.tsx`). Pages open the Expense & cash sheet with `useOpenExpenseSheet()`.
 - Empty lists / panels use `<EmptyState>` (icon, title, hint on the faint `bg-grid`). The grid is only for the login and empty states, never behind working content.
+- Mobile is compact: touch controls are 36px (`pointer-coarse:h-9`), never 44px. Dialogs/sheets/forms use tight spacing (`p-3`/`gap-2.5`, bigger from `sm:`). Tab/toggle rows are small (`text-xs`); long titles stay on one line, tabs go below.
+- Search inputs: `type="search"` (native clear button is hidden in `globals.css`); add your own clear button only if needed. Day filters use `<Input type="date">`, not prev/next arrows.
 - Check every UI change at phone (390), tablet (820) and desktop (1440).
 
 ## Git
